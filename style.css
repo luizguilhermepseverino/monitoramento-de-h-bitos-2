@@ -2084,82 +2084,260 @@ MÃO DE CARTAS (ATUALIZADO)
     margin-top: 10px;
 }
 /* =========================================
-   RESPONSIVIDADE - CELULARES (MOBILE)
-   ========================================= */
-@media (max-width: 768px) {
-    /* 1. Libera o scroll da página e tira a trava de tela cheia */
-    body {
-        height: auto;
-        min-height: 100vh;
-        overflow-y: auto !important; /* Permite rolar a tela toda */
-        overflow-x: hidden;
-        display: block; /* Tira o flex principal que espreme tudo */
+   MOBILE FIX DEFINITIVO
+========================================= */
+@media (max-width:768px){
+
+    html,
+    body{
+        width:100%;
+        min-height:100vh;
+
+        overflow-x:hidden;
+        overflow-y:auto !important;
+
+        height:auto !important;
     }
 
-    * {
-        box-sizing: border-box !important;
+    body{
+        display:block;
     }
 
-    .app-container {
-        display: block; /* Empilha os elementos naturalmente */
-        height: auto;
-        padding: 10px;
-        padding-bottom: 110px; /* ESPAÇO VITAL para o seu menu inferior não cobrir as coisas */
-        width: 100vw;
+    /* APP */
+    .app-container{
+        display:flex;
+        flex-direction:column;
+
+        width:100%;
+        min-height:100vh;
+
+        height:auto !important;
+
+        overflow:visible !important;
+
+        padding:10px;
+        padding-bottom:120px;
+
+        gap:15px;
     }
 
-    /* 2. Arruma a lista de hábitos (Hábito "Estudar" cortado) */
-    .habits-section {
-        width: 100% !important;
-        max-width: 100%;
-        height: auto; /* Remove o 100vh que estava cortando o layout */
-        min-height: 50vh;
-        margin-bottom: 20px; 
-        flex: none;
+    /* SCREENS */
+    .screen,
+    .screen.active-screen{
+        width:100%;
+        height:auto !important;
+        min-height:auto !important;
+
+        overflow:visible !important;
     }
 
-    #tab-pending, #tab-history {
-        overflow-y: visible; /* Deixa o scroll natural da página agir */
+    /* HÁBITOS */
+    .habits-section{
+        width:100% !important;
+        min-width:100% !important;
+        max-width:100% !important;
+
+        height:auto !important;
+        min-height:auto !important;
+
+        overflow:visible !important;
+
+        padding:15px;
     }
 
-    /* 3. Arruma a tela de Batalha (Cartas cortadas) */
-    .game-section {
-        width: 100% !important;
-        height: auto;
-        flex: none;
-        padding: 10px;
+    #tab-pending,
+    #tab-history{
+        overflow:visible !important;
+        height:auto !important;
+        max-height:none !important;
     }
 
-    .battle-screen {
-        flex-direction: column; /* Coloca o inimigo em cima e o jogador embaixo */
-        padding: 15px;
-        gap: 20px;
-        width: 100%;
+    /* GAME SECTION */
+    .game-section{
+        width:100% !important;
+
+        display:flex !important;
+        flex-direction:column;
+
+        height:auto !important;
+        min-height:auto !important;
+
+        overflow:visible !important;
+
+        padding:10px 0;
     }
 
-    /* 4. Ajuste da Mão de Cartas */
-    .hand {
-        height: auto; /* Tira a altura fixa de 210px que estava limitando o espaço */
-        flex-wrap: wrap; /* Faz as cartas quebrarem linha organizadamente */
-        justify-content: center;
-        gap: 8px;
-        padding: 10px 0;
+    /* BATALHA */
+    .battle-screen{
+        width:100%;
+
+        height:auto !important;
+
+        display:flex;
+        flex-direction:column;
+
+        align-items:center;
+        justify-content:flex-start;
+
+        gap:30px;
+
+        padding:20px 10px 20px 10px;
+
+        overflow:visible !important;
     }
 
-    /* Diminui o tamanho das cartas só no celular pra caberem mais na tela */
-    :root {
-        --card-width: 75px;
-        --card-height: 110px;
+    .battle-entities{
+        width:100%;
+
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+
+        padding:0 10px;
+
+        margin-top:0;
     }
 
-    /* Ajusta o ícone de custo de energia da carta para não ficar gigante nela pequena */
-    .card-cost {
-        width: 22px; 
-        height: 22px;
-        font-size: 11px;
+    .entity{
+        margin-top:0;
     }
 
-    .card:hover:not(.disabled) { 
-        transform: translateY(-10px); /* Animação menor pra não travar no celular */
+    .entity img{
+        width:90px;
     }
+
+    /* HUD */
+    .game-controls{
+        width:100%;
+
+        flex-wrap:wrap;
+
+        justify-content:center;
+
+        gap:15px;
+
+        padding:15px;
+
+        border-radius:20px;
+    }
+
+    /* CARTAS */
+    .hand{
+        width:100%;
+
+        display:flex;
+
+        flex-wrap:wrap;
+
+        justify-content:center;
+
+        align-items:flex-start;
+
+        gap:8px;
+
+        padding:10px 5px 30px 5px;
+
+        min-height:auto !important;
+
+        overflow:visible !important;
+    }
+
+    .card{
+        width:78px;
+        height:115px;
+    }
+
+    .card-image{
+        width:78px;
+        height:115px;
+    }
+
+    .card-tooltip{
+        max-width:140px;
+        font-size:0.72rem;
+    }
+
+    /* MODAL */
+    .modal-overlay{
+        padding:15px;
+        align-items:flex-start;
+
+        overflow-y:auto;
+    }
+
+    .modal-content{
+        position:relative !important;
+
+        top:auto !important;
+        left:auto !important;
+
+        transform:none !important;
+
+        width:100% !important;
+        max-width:100% !important;
+
+        margin-top:20px;
+
+        padding:20px;
+    }
+
+    /* SIDEBAR MOBILE */
+    .main-sidebar{
+        position:fixed;
+
+        bottom:0;
+        left:0;
+
+        width:100%;
+        height:85px;
+
+        padding:10px;
+
+        z-index:9999;
+    }
+
+    .sidebar-menu{
+        width:100%;
+
+        display:flex;
+        flex-direction:row;
+
+        justify-content:space-around;
+
+        gap:8px;
+    }
+
+    .sidebar-btn{
+        flex:1;
+
+        justify-content:center;
+
+        padding:10px;
+    }
+
+    /* HÁBITOS */
+    .habit-item{
+        width:100%;
+
+        padding:14px;
+
+        min-height:auto;
+
+        align-items:flex-start;
+
+        gap:12px;
+    }
+
+    .habit-content{
+        gap:12px;
+    }
+
+    .habit-title{
+        font-size:1rem;
+    }
+
+    .habit-details{
+        font-size:0.8rem;
+    }
+
 }
