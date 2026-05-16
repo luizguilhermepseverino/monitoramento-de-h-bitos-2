@@ -1,0 +1,2151 @@
+ /* --- CONFIGURAÇÕES GERAIS E VARIÁVEIS --- */
+    :root {
+        --primary-blue: #4a90e2;
+        --accent-gold: #f1c40f;
+        --bg-dark: #0b0e14;
+        --panel-bg: rgba(31, 31, 45, 0.95);
+        --border-color: rgba(255, 255, 255, 0.1);
+        --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.7);
+        --card-width: 120px;
+        --card-height: 174px;
+    }
+
+    body {
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background: var(--bg-dark);
+        color: #e0e0e0;
+        margin: 0;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .screen {
+        display: none;
+        width: 100%;
+        height: 100%;
+    }
+
+
+    /* --- TELA DE LOGIN E OVERLAYS --- */
+    .overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: radial-gradient(circle, rgba(26, 28, 35, 0.8) 0%, rgba(11, 14, 20, 0.9) 100%), url('fundo.png');
+        background-size: cover;
+        display: flex; justify-content: center; align-items: center;
+        z-index: 1000;
+    }
+
+    #rewardScreen, #minigameOverlay {
+        background: rgba(0, 0, 0, 0.92);
+        backdrop-filter: blur(12px);
+        z-index: 9999;
+        overflow: visible;
+    }
+
+    /* SELETOR SEPARADO */
+    #rewardScreen .card:hover {
+        z-index: 9999;
+    }
+
+
+
+
+
+    .login-box {
+        background: var(--panel-bg);
+        padding: 35px;
+        border-radius: 24px;
+        box-shadow: 0 0 50px rgba(74, 144, 226, 0.15);
+        text-align: center;
+        width: 340px;
+        border: 1px solid rgba(74, 144, 226, 0.3);
+        backdrop-filter: blur(15px);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .login-logo {
+        width: 120px;
+        height: auto;
+        margin: 0 auto 20px auto;
+        filter: drop-shadow(0 0 10px var(--primary-blue));
+        border-radius: 12px;
+    }
+
+    .login-box h1 { color: var(--primary-blue); margin: 0 0 5px 0; font-size: 1.5rem; }
+    .login-box p { font-size: 0.85rem; margin-bottom: 15px; color: #aaa; }
+
+    .login-box input, .login-input, select, #minigameInput {
+        width: 100%;
+        padding: 14px;
+        margin: 8px 0;
+        border-radius: 10px;
+        border: 1px solid #333;
+        background: rgba(18, 20, 29, 0.8);
+        color: white;
+        box-sizing: border-box;
+        font-size: 0.95rem;
+        outline: none;
+        text-align: center;
+        transition: 0.3s;
+    }
+
+    .login-box input:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
+    }
+
+    /* --- MINIGAME (CIENTISTA) --- */
+    .minigame-container {
+        background: #1f1f2e;
+        padding: 40px;
+        border-radius: 20px;
+        border: 2px solid #9b59b6;
+        box-shadow: 0 0 40px rgba(155, 89, 182, 0.4);
+        text-align: center;
+        width: 400px;
+    }
+
+    .timer-container {
+        width: 100%; height: 12px; background: #111;
+        border-radius: 6px; overflow: hidden; margin-bottom: 25px;
+        border: 1px solid #444;
+    }
+
+    #minigameTimerBar {
+        height: 100%;
+        background: linear-gradient(90deg, #9b59b6, #e056fd);
+        width: 100%;
+        transition: width 0.1s linear;
+    }
+
+    #minigamePrompt {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin: 20px 0;
+        color: #fff;
+    }
+
+    /* --- ESTRUTURA PRINCIPAL --- */
+    .app-container {
+        display: flex;
+        width: 100%; height: 100vh;
+        padding: 15px;
+        box-sizing: border-box;
+        gap: 20px;
+    }
+
+    section {
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+    }
+
+    /* --- SEÇÃO DE HÁBITOS --- */
+    .habits-section { 
+        flex: 0 0 350px; 
+        background: rgba(20, 22, 30, 0.95);
+        color: #e0e0e0;
+        backdrop-filter: blur(10px);
+        box-shadow: var(--shadow-heavy);
+        padding: 20px;
+    }
+
+
+    .sidebar-header {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .date-control {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .current-day {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #111;
+    }
+
+    .btn-advance {
+        background: #2d3436;
+        color: #fff;
+        border: 1px solid #444;
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .btn-advance:hover { background: #444; }
+
+    .tab-controls {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .tab-btn {
+        flex: 1;
+        background: rgba(255,255,255,0.05);
+        color: #555;
+        border: none;
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: 0.3s;
+    }
+
+    .tab-btn.active {
+        background: var(--primary-blue);
+        color: white;
+        box-shadow: 0 4px 10px rgba(74, 144, 226, 0.3);
+    }
+
+    /* --- CRIADOR DE HÁBITOS --- */
+.habit-creator{
+    width:340px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(22,26,36,0.98),
+            rgba(14,17,25,0.98)
+        );
+
+    border:
+        1px solid rgba(255,255,255,0.06);
+
+    border-radius:24px;
+
+    padding:18px;
+
+    box-sizing:border-box;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:14px;
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,0.35);
+}
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+        font-size: 1rem;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #fff;
+    }
+
+    .emoji-picker {
+        display: flex;
+        gap: 8px;
+        margin: 10px 0;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        justify-content: space-around;
+        border: 1px solid #333;
+    }
+
+    .emoji-item {
+        cursor: pointer;
+        font-size: 1.4rem;
+        padding: 5px;
+        filter: grayscale(0.8);
+        transition: 0.2s;
+    }
+
+    .emoji-item.selected, .emoji-item:hover {
+        filter: grayscale(0);
+        transform: scale(1.2);
+    }
+
+
+.habit-item{
+    max-width:1000px;
+    margin:auto;
+
+    min-height: 72px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(74,144,226,0.15),
+            rgba(0,0,0,0.35)
+        );
+
+    border:
+        1px solid rgba(255,255,255,0.06);
+
+    border-left:
+        5px solid #4a90e2;
+
+    border-radius:16px;
+
+    padding:14px 16px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    box-sizing:border-box;
+
+    transition:0.25s;
+}
+
+    /* brilho animado */
+    .habit-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: 0.5s;
+    }
+
+    .habit-item:hover::before {
+        left: 100%;
+    }
+
+    .habit-item:hover {
+        transform: translateX(6px) scale(1.02);
+        box-shadow: 0 0 15px rgba(74, 144, 226, 0.3);
+    }
+
+    .btn-sugestao {
+        background: linear-gradient(135deg, #2980b9, #3498db);
+        width: 100%;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        margin-bottom: 10px;
+        transition: 0.2s;
+    }
+
+
+
+    #screen-battle{
+        justify-content:flex-start;
+        align-items:center;
+    }
+
+    .battle-screen{
+        width:100%;
+        display:flex;
+        justify-content:space-around;
+        align-items:center;
+        margin-top:30px;
+    }
+    .sprite-container {
+        width: 72px;
+        height: 72px;
+
+        border-radius: 50%;
+        border: 3px solid rgba(255,255,255,0.25);
+
+        box-shadow: 0 0 18px rgba(0,0,0,0.5);
+
+        overflow: hidden;
+    }
+
+    .sprite-container img { width: 100%; height: 100%; object-fit: contain; }
+
+    .hp-bar {
+        width: 140px; height: 14px;
+        background: #111;
+        border-radius: 10px;
+        border: 2px solid #000;
+        position: relative;
+        overflow: hidden;
+        margin-top: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .hp-text-overlay {
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        font-size: 11px;
+        font-weight: bold;
+        line-height: 16px;
+        color: white;
+        text-shadow: 1px 1px 2px black;
+        z-index: 5;
+    }
+
+    #playerHp, #enemyHp { 
+        background: linear-gradient(90deg, #ff4d4d, #b91d1d); 
+        height: 100%;
+        transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    }
+
+    /* --- ESCUDOS --- */
+    .shield-badge {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-weight: bold;
+        font-size: 0.85rem;
+        display: inline-block;
+        margin-top: 8px;
+        border: 1px solid rgba(255,255,255,0.4);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+        from { transform: scale(0); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    #enemyNameDisplay, #playerNameDisplay {
+        margin-top: 8px;
+        font-weight: bold;
+        color: #fff;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+    }
+
+    .card::after {
+        content: '';
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    .card:hover:not(.disabled) { 
+        transform: translateY(-25px) rotateX(10deg);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 15px var(--accent-gold);
+        z-index: 9999;
+    }
+
+    .card.disabled { filter: grayscale(1) brightness(0.3); cursor: not-allowed; }
+
+    .card-cost {
+        position: absolute;
+        top: 6px; left: 6px;
+        background: var(--accent-gold);
+        color: #000;
+        width: 26px; height: 26px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center; align-items: center;
+        font-weight: bold;
+        font-size: 13px;
+        z-index: 5;
+        border: 1.5px solid #000;
+        box-shadow: 0 0 8px rgba(241, 196, 15, 0.5);
+    }
+
+    .card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        pointer-events: none;
+    }
+
+    /* Tipos de Cartas Refinadas */
+    .card-ataque { background: linear-gradient(to bottom, #7f1d1d, #450a0a); border-color: #ef4444; }
+    .card-defesa { background: linear-gradient(to bottom, #1e3a8a, #172554); border-color: #3b82f6; }
+    .card-magia { background: linear-gradient(to bottom, #581c87, #2e1065); border-color: #a855f7; }
+    .card-espada { background: linear-gradient(to bottom, #92400e, #451a03); border-color: #f59e0b; }
+    .card-raio { background: linear-gradient(to bottom, #3f3f46, #18181b); border-color: #eab308; }
+
+    /* --- HUD DE COMBATE --- */
+.game-controls{
+    display:flex;
+    gap:30px;
+    align-items:center;
+
+    margin-bottom:10px;
+
+    background:rgba(0,0,0,0.6);
+
+    padding:10px 30px;
+
+    border-radius:50px;
+
+    border:1px solid rgba(255,255,255,0.1);
+
+    position:relative;
+
+    z-index:50;
+}
+
+    .stats {
+        font-family: 'Courier New', monospace;
+        font-size: 1.2rem;
+        font-weight: bold;
+        letter-spacing: 2px;
+        color: #00ffcc;
+        text-shadow: 0 0 8px rgba(0, 255, 204, 0.5);
+    }
+
+    .btn-turn {
+        background: linear-gradient(135deg, #f97316, #ea580c);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: bold;
+        text-transform: uppercase;
+        box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);
+        transition: 0.2s;
+    }
+
+    .btn-turn:hover { filter: brightness(1.1); transform: scale(1.05); }
+
+    #battleLog {
+        font-style: italic;
+        color: #bdc3c7;
+        margin-top: 5px;
+        font-size: 0.9rem;
+        height: 1.2rem;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    }
+
+    /* --- PARRY SYSTEM --- */
+    #parryOverlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 3000;
+    }
+    .skill-check-container {
+        position: relative; width: 220px; height: 220px; 
+        border: 6px double rgba(255,255,255,0.5); 
+        border-radius: 50%;
+        box-shadow: 0 0 50px rgba(241, 196, 15, 0.2);
+    }
+    #skillZone {
+        position: absolute; width: 100%; height: 100%; border-radius: 50%;
+        border: 20px solid transparent; border-top-color: var(--accent-gold);
+        transform: rotate(0deg);
+    }
+    #skillNeedle {
+        position: absolute; width: 6px; height: 110px; 
+        background: linear-gradient(to top, transparent, #ff0000);
+        left: 50%; bottom: 50%; transform-origin: bottom center;
+        border-radius: 3px;
+    }
+
+    /* --- ANIMAÇÕES DE DANO --- */
+    @keyframes shake {
+        0%, 100% { transform: translate(0,0); }
+        25% { transform: translate(-5px, 5px); }
+        50% { transform: translate(5px, -5px); }
+        75% { transform: translate(-5px, -5px); }
+    }
+    .damage-shake { animation: shake 0.25s cubic-bezier(.36,.07,.19,.97) both; }
+
+    /* --- ESTILOS DO BOTÃO CONCLUIR (btn-main) --- */
+.btn-main{
+    width:100%;
+
+    height:48px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #22c55e,
+            #16a34a
+        );
+
+    color:white;
+
+    font-size:0.95rem;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:0.2s;
+
+    box-shadow:
+        0 8px 18px rgba(34,197,94,0.25);
+}
+
+.btn-main:hover{
+    transform:translateY(-2px);
+
+    filter:brightness(1.05);
+}
+
+
+    .btn-sugestao:active {
+        transform: translateY(2px);
+        box-shadow: 0 2px 0 #2980b9 !important;
+    }
+
+    /* Estilo das sugestões dentro do menu */
+    .suggestion-list {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid #4a90e2;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 15px;
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Duas colunas */
+        gap: 8px;
+    }
+
+    .suggestion-item-btn {
+        background: #1a1a2e;
+        color: #bdc3c7;
+        border: 1px solid #34495e;
+        padding: 8px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.85em;
+        transition: 0.2s;
+    }
+
+    .suggestion-item-btn:hover {
+        background: #4a90e2;
+        color: white;
+        border-color: #fff;
+    }
+
+    /* O BOTÃO "CRIAR HÁBITO" (ESTILO HERÓICO) */
+
+
+    .btn-main:hover {
+        filter: brightness(1.1);
+        transform: translateY(-2px);
+        border-bottom-width: 7px;
+    }
+
+    .btn-main:active {
+        transform: translateY(3px);
+        border-bottom-width: 2px;
+    }
+
+    /* ESTILIZAÇÃO DO CAMPO DE TEXTO (INPUT) */
+    /* LOCAL: Procure por #habitInput e substitua por este */
+
+    /* Efeito de brilho quando o jogador clica para digitar */
+    #habitInput:focus {
+        border-color: #f1c40f; /* Muda para dourado no foco */
+        box-shadow: 0 0 15px rgba(241, 196, 15, 0.4), inset 0 0 5px rgba(0,0,0,0.5);
+        background: rgba(25, 25, 40, 0.9);
+    }
+
+    /* Estilização do texto de exemplo (Placeholder) */
+    #habitInput::placeholder {
+        color: #7f8c8d;
+        font-style: italic;
+        opacity: 0.7;
+    }
+
+    /* ESTILIZAÇÃO DO CAMPO DE TEXTO (INPUT) */
+    #habitInput {
+        width: 100%;
+        background: rgba(15, 15, 25, 0.8); /* Fundo escuro semi-transparente */
+        border: 2px solid #4a90e2; /* Borda azul heróica */
+        border-radius: 8px;
+        padding: 12px 15px;
+        color: #fff;
+        font-size: 1rem;
+        outline: none;
+        transition: all 0.3s ease;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5); /* Sombra interna para profundidade */
+        margin-bottom: 15px;
+        border-left: 5px solid #4a90e2; /* Detalhe lateral para parecer um display */
+    }
+
+    /* Efeito de foco: quando você clica para digitar */
+    #habitInput:focus {
+        border-color: #f1c40f;
+        box-shadow: 0 0 15px rgba(241, 196, 15, 0.3), inset 0 0 5px rgba(0,0,0,0.5);
+        background: rgba(25, 25, 40, 0.9);
+    }
+
+    /* Placeholder (o texto de exemplo) mais discreto */
+    #habitInput::placeholder {
+        color: #576574;
+        font-style: italic;
+    }
+    #habitInput{
+    width:100%;
+
+    height:46px;
+
+    padding:0 14px;
+
+    border-radius:12px;
+
+    border:1px solid rgba(74,144,226,0.35);
+
+    background:
+        rgba(8,12,20,0.95);
+
+    color:white;
+
+    font-size:0.95rem;
+
+    outline:none;
+
+    box-sizing:border-box;
+
+    transition:0.2s;
+}
+
+#habitInput:focus{
+    border-color:#4a90e2;
+
+    box-shadow:
+        0 0 0 3px rgba(74,144,226,0.15);
+}
+/* Container da lista de hábitos */
+#habitList {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centraliza os cards horizontalmente */
+    gap: 20px;
+    padding: 20px 10px;
+    list-style: none;
+}
+
+/* O Card do Hábito */
+.habit-item {
+    background: linear-gradient(90deg, rgba(22, 33, 62, 0.9) 0%, rgba(26, 26, 46, 0.95) 100%);
+    border: 2px solid #4a90e2;
+    border-left: 8px solid #4a90e2; /* Faixa lateral de destaque */
+    border-radius: 15px;
+    
+    width: 100%;
+    max-width: 850px; /* Define o tamanho grande que você deseja */
+    min-height: 100px;
+    
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    position: relative;
+}
+
+.habit-item:hover {
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: 0 15px 30px rgba(74, 144, 226, 0.2);
+    border-color: #5dade2;
+}
+
+/* Estilo do Texto e Ícone */
+.habit-content {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.habit-icon {
+    font-size: 2.5rem; /* Ícone bem grande */
+    filter: drop-shadow(0 0 5px rgba(255,255,255,0.3));
+}
+
+.habit-text-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.habit-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.habit-details {
+    font-size: 1rem;
+    color: #5dade2;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+/* Checkbox estilizado (O Check de conclusão) */
+.habit-check-btn {
+    width: 45px;
+    height: 45px;
+    background: rgba(46, 204, 113, 0.1);
+    border: 2px solid #2ecc71;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: transparent;
+    transition: 0.2s;
+}
+
+.habit-check-btn:hover {
+    background: rgba(46, 204, 113, 0.3);
+    color: #2ecc71;
+}
+
+/* Quando o hábito estiver concluído */
+.habit-item.completed {
+    opacity: 0.6;
+    border-color: #2ecc71;
+    border-left-color: #2ecc71;
+    filter: grayscale(0.5);
+}
+
+
+
+    /* Correção específica para o botão de Iniciar Batalha */
+    #btnStartBattle {
+        width: auto; /* Deixa ele do tamanho do texto */
+        min-width: 200px;
+        padding: 10px 20px;
+        font-size: 0.9rem;
+        background: linear-gradient(135deg, #e74c3c, #c0392b) !important; /* Vermelho sem verde */
+        border: none !important; 
+        border-bottom: 4px solid #962d22 !important;
+        box-shadow: 0 4px 15px rgba(192, 57, 43, 0.4) !important;
+    }
+
+    #btnStartBattle:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.1);
+    }
+
+    #btnStartBattle:active {
+        transform: translateY(2px);
+        border-bottom-width: 2px !important;
+    }
+
+    /* Estilo para o Tooltip das Cartas */
+    .card { position: relative; cursor: pointer; }
+
+    .card-tooltip {
+        display: none;
+        position: absolute;
+        bottom: 115%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.95);
+        color: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 0.85em;
+        width: 160px;
+        text-align: center;
+        z-index: 5000;
+        border: 1px solid #f1c40f;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        pointer-events: none;
+    }
+
+    .card:hover .card-tooltip {
+        display: block;
+    }
+
+    /* Garante que o texto de HP fique sempre visível sobre a barra */
+    .hp-text-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 0.9em;
+        text-shadow: 1px 1px 2px black;
+        z-index: 5;
+    }
+
+    .hp-bar {
+        position: relative; /* Necessário para o overlay funcionar */
+        height: 20px;
+        background: #333;
+        border-radius: 5px;
+        overflow: hidden;
+        border: 1px solid #555;
+    }
+
+    .energy-gain {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 28px;
+        font-weight: bold;
+        color: #f1c40f;
+        animation: floatUp 1s ease-out forwards;
+        pointer-events: none;
+        z-index: 9999;
+    }
+
+    @keyframes floatUp {
+        0% {
+            opacity: 1;
+            transform: translate(-50%, -50%);
+        }
+        100% {
+            opacity: 0;
+            transform: translate(-50%, -120%);
+        }
+    }
+
+    .habit-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .habit-icon {
+        font-size: 1.2rem;
+    }
+
+    .habit-text {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .habit-title {
+        font-weight: bold;
+        color: white;
+    }
+    .easy { color: #22c55e; }
+    .medium { color: #f59e0b; }
+    .hard { color: #ef4444; }
+
+    .habit-check {
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        border: 2px solid #9ca3af;
+        cursor: pointer;
+        background: white;
+    }
+
+    .habit-check.done {
+        background: #22c55e;
+        border-color: #22c55e;
+    }
+    .habit-item.done {
+        opacity: 0.6;
+    }
+
+    .habit-item.done .habit-title {
+        text-decoration: line-through;
+    }
+    .hidden {
+        display: none !important;
+    }
+
+    #weekDaysSelector {
+        margin-top: 10px;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    .days-flex {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 5px;
+    }
+
+    .days-flex label {
+        font-size: 0.8rem;
+        cursor: pointer;
+        background: #eee;
+        padding: 5px 8px;
+        border-radius: 4px;
+        color: #333;
+    }
+
+    .days-flex input:checked + label {
+        background: #3498db;
+        color: white;
+    }
+    /* 1. Garante que a barra lateral não ultrapasse a altura da tela */
+    .habits-section {
+        height: 100vh; /* Ocupa 100% da altura da visão */
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; /* Evita que a barra inteira role, queremos rolar só a lista */
+    }
+
+    /* 2. Faz com que a área de conteúdo dos hábitos seja rolável */
+    #tab-pending, #tab-history {
+        flex: 1; /* Ocupa o espaço restante */
+        overflow-y: auto; /* Ativa o scroll vertical quando necessário */
+        padding-right: 10px; /* Espaço para a barra de rolagem não cobrir o texto */
+        min-height: 0; /* Garante que ele não tenha tamanho mínimo */
+        height: auto;  /* Faz com que ele só cresça se tiver conteúdo dentro */
+        flex: none;    /* Se estiver dentro de um flex container, evita que ele estique */
+    }
+
+    /* 3. Estilização opcional para a barra de rolagem ficar com "cara de jogo" */
+    #tab-pending::-webkit-scrollbar, 
+    #tab-history::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    #tab-pending::-webkit-scrollbar-track, 
+    #tab-history::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+    }
+
+    #tab-pending::-webkit-scrollbar-thumb, 
+    #tab-history::-webkit-scrollbar-thumb {
+        background: #3498db; /* Cor azul combinando com seu tema */
+        border-radius: 10px;
+    }
+
+    #tab-pending::-webkit-scrollbar-thumb:hover, 
+    #tab-history::-webkit-scrollbar-thumb:hover {
+        background: #2980b9;
+    }
+    #currentDayDisplay {
+        color: #3498db;
+    }
+    /* ==================================================
+    NOVO LAYOUT PROFISSIONAL
+    ================================================== */
+
+    .app-container {
+        display: flex;
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+        background:
+            radial-gradient(circle at top, rgba(74,144,226,0.08), transparent 35%),
+            #0b0e14;
+    }
+
+    /* ==================================================
+    SIDEBAR MODERNA
+    ================================================== */
+
+    .main-sidebar {
+        width: 240px;
+        min-width: 240px;
+        height: 100vh;
+
+        background:
+            linear-gradient(
+                180deg,
+                rgba(18,22,30,0.98),
+                rgba(10,12,18,0.98)
+            );
+
+        border-right:
+            1px solid rgba(255,255,255,0.06);
+
+        display: flex;
+        flex-direction: column;
+
+        padding: 25px 15px;
+
+        box-sizing: border-box;
+
+        backdrop-filter: blur(18px);
+
+        z-index: 20;
+    }
+
+    /* LOGO */
+
+    .sidebar-logo {
+        margin-bottom: 40px;
+        text-align: center;
+    }
+    .sidebar-logo h2 {
+        margin: 0;
+
+        font-size: 1.7rem;
+
+        color: #5dade2;
+
+        font-weight: 900;
+
+        letter-spacing: 2px;
+
+        text-transform: uppercase;
+
+        text-shadow:
+            0 0 5px rgba(74,144,226,0.8),
+            0 0 15px rgba(74,144,226,0.5),
+            0 0 30px rgba(74,144,226,0.3);
+    }
+
+    /* MENU */
+
+    .sidebar-menu {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* BOTÕES */
+
+    .sidebar-btn {
+        width: 100%;
+
+        background:
+            rgba(255,255,255,0.04);
+
+        border:
+            1px solid rgba(255,255,255,0.05);
+
+        color: #cbd5e1;
+
+        padding: 15px 18px;
+
+        border-radius: 16px;
+
+        cursor: pointer;
+
+        font-size: 0.95rem;
+
+        transition: 0.25s ease;
+
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        text-align: left;
+    }
+
+    .sidebar-btn:hover {
+        background:
+            rgba(74,144,226,0.15);
+
+        border-color:
+            rgba(74,144,226,0.3);
+
+        transform: translateX(5px);
+
+        color: white;
+    }
+
+    .sidebar-btn.active {
+        background:
+            linear-gradient(
+                135deg,
+                rgba(74,144,226,0.35),
+                rgba(0,210,255,0.15)
+            );
+
+        border-color:
+            rgba(74,144,226,0.4);
+
+        color: white;
+
+        box-shadow:
+            0 0 20px rgba(74,144,226,0.2);
+    }
+
+    /* ==================================================
+    ÁREA DOS HÁBITOS
+    ================================================== */
+
+    .habits-section {
+        flex: 1;
+
+        background:
+            linear-gradient(
+                180deg,
+                rgba(20,24,32,0.96),
+                rgba(12,15,22,0.98)
+            );
+
+        padding: 20px;
+
+        overflow-y: auto;
+
+        box-sizing: border-box;
+    }
+
+    /* ==================================================
+    ÁREA PRINCIPAL
+    ================================================== */
+
+    .game-section {
+        flex: 2;
+
+        display: flex;
+        flex-direction: column;
+
+        overflow: visible;
+
+        padding: 20px;
+
+        box-sizing: border-box;
+    }
+    /* ==================================================
+    BATTLE SCREEN
+    ================================================== */
+
+
+    /* ==================================================
+    CARTAS MAIS MODERNAS
+    ================================================== */
+
+
+    .card:hover:not(.disabled) {
+        transform:
+            translateY(-18px)
+            scale(1.04);
+
+        box-shadow:
+            0 20px 40px rgba(0,0,0,0.7),
+            0 0 20px rgba(74,144,226,0.3);
+    }
+
+    /* ==================================================
+    BOTÕES MAIS MODERNOS
+    ================================================== */
+
+    .btn-turn,
+    .btn-shop-toggle {
+        border-radius: 14px !important;
+
+        border: none !important;
+
+        transition:
+            0.2s ease;
+
+        font-weight: 700;
+    }
+
+
+    .btn-shop-toggle:hover {
+        transform:
+            translateY(-2px);
+
+        filter: brightness(1.08);
+    }
+
+    /* ==================================================
+    SCROLL PERSONALIZADO
+    ================================================== */
+
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.03);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: rgba(74,144,226,0.4);
+        border-radius: 10px;
+    }
+
+    /* ==================================================
+    RESPONSIVIDADE
+    ================================================== */
+
+    @media (max-width: 1100px) {
+
+        .main-sidebar {
+            width: 90px;
+            min-width: 90px;
+        }
+
+        .sidebar-logo h2 {
+            font-size: 0;
+        }
+
+        .sidebar-btn {
+            justify-content: center;
+            font-size: 0;
+        }
+
+        .sidebar-btn span {
+            font-size: 1.5rem;
+        }
+
+        .habits-section {
+            width: 320px;
+        }
+    }
+
+    @media (max-width: 900px) {
+
+/* ==================================================
+ÁREA DOS HÁBITOS (CORRIGIDA)
+================================================== */
+
+.habits-section{
+    width: 360px;
+    min-width: 360px;
+    max-width: 360px;
+
+    height: 100vh;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(18,22,30,0.98),
+            rgba(10,12,18,0.98)
+        );
+
+    border-right:1px solid rgba(255,255,255,0.06);
+
+    padding:20px;
+
+    box-sizing:border-box;
+
+    overflow-y:auto;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:15px;
+
+    flex:none; /* IMPORTANTE */
+}
+
+
+    }
+    /* ==========================================
+    SISTEMA DE TELAS
+    ========================================== */
+    /* ==========================================
+    SISTEMA DE TELAS
+    ========================================== */
+
+/* ==========================================
+SISTEMA DE TELAS
+========================================== */
+
+.screen{
+    display:none;
+    width:100%;
+    height:100%;
+}
+
+.screen.active-screen{
+    display:block;
+}
+
+/* =========================
+TELA HÁBITOS
+========================= */
+
+#screen-habits.active-screen{
+    display:flex;
+    gap:20px;
+    width:100%;
+    height:100%;
+}
+
+#screen-battle.active-screen{
+    display:flex;
+    flex-direction:column;
+
+    overflow:hidden;
+
+    background:
+        linear-gradient(
+            rgba(8,10,18,0.55),
+            rgba(8,10,18,0.80)
+        ),
+        url('fundo.png');
+
+    background-size:cover;
+    background-position:center;
+}
+
+#screen-history.active-screen,
+#screen-shop.active-screen,
+#screen-settings.active-screen{
+    display:block;
+}
+
+/* outras telas */
+
+#screen-history.active-screen,
+#screen-shop.active-screen,
+#screen-settings.active-screen{
+    display:block;
+}
+
+/* =========================
+GAME SECTION
+========================= */
+
+.game-section{
+    flex:1;
+    justify-content:flex-start;
+    align-items:center;
+    display:none;
+    flex-direction:column;
+
+    min-height:0;
+
+    overflow:hidden;
+}
+
+
+/* =========================
+CARTAS
+========================= */
+
+.card{
+    width:100px;
+    height:145px;
+
+    position:relative;
+
+    overflow:visible;
+
+    flex-shrink:0;
+}
+.card-image{
+    width:100px;
+    height:145px;
+
+    border-radius:18px;
+
+    overflow:hidden;
+
+    position:relative;
+}
+
+.card:hover:not(.disabled){
+    transform:
+        translateY(-20px)
+        scale(1.04);
+
+    z-index:9999;
+}
+
+/* =========================
+TOOLTIP
+========================= */
+
+.card-tooltip{
+    display:none;
+
+    position:absolute;
+
+    bottom:115%;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    width:max-content;
+    max-width:220px;
+
+    background:rgba(0,0,0,0.95);
+
+    border:1px solid #f1c40f;
+
+    border-radius:10px;
+
+    padding:10px;
+
+    color:white;
+
+    font-size:0.85rem;
+
+    text-align:center;
+
+    z-index:99999;
+
+    pointer-events:none;
+
+    white-space:normal;
+
+    word-wrap:break-word;
+
+    line-height:1.4;
+}
+
+.card:hover .card-tooltip{
+    display:block;
+}
+.sidebar-header{
+    display:flex;
+    align-items:flex-start;
+
+    gap:15px;
+}
+/* ==================================================
+   MODAL DE CRIAR NOVO HÁBITO (NOVO)
+   ================================================== */
+/* O Fundo escuro que cobre a tela toda */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85); /* Fundo bem escuro para destaque */
+    backdrop-filter: blur(8px);    /* Desfoque no fundo (estilo moderno) */
+    display: flex;
+    justify-content: center;       /* Centraliza na horizontal */
+    align-items: center;           /* Centraliza na vertical */
+    z-index: 9999;                 /* Garante que fique acima de tudo */
+}
+
+/* A caixa branca/escura do formulário */
+.modal-content {
+    background: #141820;           /* Cor do seu tema */
+    border: 2px solid #4a90e2;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 550px;              /* Largura confortável para leitura */
+    padding: 30px;
+    box-shadow: 0 0 50px rgba(74, 144, 226, 0.3);
+    position: fixed;            /* Para elementos internos */
+    top:50%;
+    left:35%;
+    transform:translate(-50%, -50%);
+}
+
+/* Deixar os inputs um pouco maiores para acompanhar o modal */
+#habitInput, #habitDifficulty, #habitType {
+    font-size: 1.1em !important;
+    padding: 15px !important;
+}
+
+@keyframes slideUpModal {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.btn-close-modal {
+    background: transparent; 
+    color: #ef4444; 
+    border: 2px solid #ef4444; 
+    border-radius: 8px;
+    padding: 10px; 
+    width: 100%; 
+    cursor: pointer; 
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.btn-close-modal:hover {
+    background: #ef4444;
+    color: white;
+}
+/* ==========================================
+GRÁFICO / HISTÓRICO
+========================================== */
+
+.chart-container{
+    width:100%;
+
+    max-width:1100px;
+
+    height:350px; /* <<< controla o tamanho */
+
+    margin:20px auto;
+
+    padding:20px;
+
+    border-radius:24px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(18,22,30,0.98),
+            rgba(10,12,18,0.98)
+        );
+
+    border:
+        1px solid rgba(255,255,255,0.06);
+
+    box-sizing:border-box;
+}
+
+/* canvas do gráfico */
+
+#habitChart {
+    width: 100% !important;
+    height: 320px !important;
+
+    image-rendering: auto;
+}
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
+.app-container {
+    height: 100vh;
+    overflow: hidden;
+}
+
+.main-content {
+    height: 100vh;
+    overflow-y: auto;
+
+    padding-bottom: 120px;
+}
+
+/* Área do histórico */
+#screen-history {
+    height: 100%;
+    overflow-y: auto;
+
+    padding-bottom: 100px;
+}
+
+/* Container do gráfico */
+.history-chart-container {
+    width: 100%;
+    height: 350px;
+
+    position: relative;
+}
+
+/* Canvas */
+#habitChart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Lista de hábitos concluídos */
+.done-habits-container {
+    max-height: 280px;
+    overflow-y: auto;
+
+    padding-right: 6px;
+}
+.cards-container {
+
+    display: grid;
+
+    grid-template-columns: repeat(5, 1fr);
+
+    gap: 25px;
+
+    padding: 30px;
+
+    overflow-y: auto;
+
+}
+.cards-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(5, 1fr);
+
+    gap: 25px;
+
+    padding: 25px;
+
+    overflow-y: auto;
+
+    max-height: 85vh;
+
+}
+
+/* RESPONSIVO */
+@media(max-width: 1400px) {
+
+    .cards-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+}
+
+@media(max-width: 1100px) {
+
+    .cards-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+}
+
+@media(max-width: 800px) {
+
+    .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+.card-collection {
+
+    position: relative;
+
+    width: 180px;
+
+    height: 260px;
+
+    background: linear-gradient(
+        180deg,
+        #1b1f38,
+        #0f172a
+    );
+
+    border-radius: 20px;
+
+    border: 2px solid rgba(255,255,255,0.08);
+
+    overflow: hidden;
+
+    transition: 0.25s;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 0 15px rgba(0,0,0,0.5);
+
+}
+
+.card-collection:hover {
+
+    transform:
+        translateY(-8px)
+        scale(1.03);
+
+    box-shadow:
+        0 0 25px rgba(52,152,219,0.5);
+
+}
+
+.card-collection img {
+
+    width: 100%;
+
+    height: 130px;
+
+    object-fit: cover;
+
+}
+
+.card-collection .card-name {
+
+    font-size: 1.1em;
+
+    font-weight: bold;
+
+    color: white;
+
+    padding: 10px;
+
+    text-align: center;
+
+}
+
+.card-collection .card-desc {
+
+    color: #cbd5e1;
+
+    font-size: 0.85em;
+
+    padding: 0 12px;
+
+    text-align: center;
+
+}
+
+.card-collection .card-cost {
+
+    position: absolute;
+
+    top: 10px;
+
+    left: 10px;
+
+    width: 35px;
+
+    height: 35px;
+
+    border-radius: 50%;
+
+    background: #3498db;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: white;
+
+    font-weight: bold;
+
+    font-size: 1em;
+
+    border: 2px solid white;
+
+}
+.cards-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:20px;
+    padding:20px;
+}
+
+.collection-card{
+    position: relative;
+    background:#16213e;
+    border:2px solid #0f3460;
+    border-radius:15px;
+    padding:15px;
+    text-align:center;
+    color:white;
+    transition:0.2s;
+    box-shadow:0 0 15px rgba(0,0,0,0.5);
+}
+
+.collection-card:hover{
+    transform:translateY(-5px) scale(1.03);
+    border-color:#f1c40f;
+}
+
+.collection-card-img{
+    width:100%;
+    height:220px;
+    object-fit:contain;
+    margin:10px 0;
+}
+
+.card-top{
+    padding:5px;
+    border-radius:8px;
+    margin-bottom:10px;
+    font-weight:bold;
+}
+
+.card-cost{
+    color:white;
+}
+
+.card-ataque{
+    background:#c0392b;
+}
+
+.card-defesa{
+    background:#2980b9;
+}
+
+.card-magia{
+    background:#c0392b;
+}
+
+.card-raio{
+    background:#c0392b;
+    color:black;
+}
+
+.card-espada{
+    background:#c0392b;
+}
+.card-description{
+    margin-top: 6px;
+
+    text-align: center;
+
+    color: white;
+
+    font-size: 14px;
+
+    line-height: 1.4;
+
+    white-space: normal;
+
+    word-wrap: break-word;
+
+    overflow-wrap: break-word;
+
+    max-width: 100%;
+
+    padding: 0 6px;
+
+    box-sizing: border-box;
+}
+
+.habit-description{
+    font-size: 13px;
+    opacity: 0.7;
+    margin-top: 4px;
+    color: #b8c7ff;
+}
+/* Força o botão a vir para a camada mais alta e aceitar cliques */
+.beta-btn {
+    position: relative !important;
+    z-index: 9999 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*Mobile*/
+@media (max-width: 768px){
+
+    .main-sidebar{
+        width:100%;
+        height:auto;
+        display:flex;
+        position:fixed;
+        bottom:0;
+        left:0;
+        z-index:999;
+    }
+
+    .sidebar-menu{
+        display:flex;
+        flex-direction:row;
+        width:100%;
+    }
+
+}
+@media (max-width:768px){
+/* =========================
+BATTLE SCREEN (CORRIGIDO)
+========================= */
+
+/* =========================
+BATTLE SCREEN (ATUALIZADO)
+========================= */
+.battle-screen {
+    width: 100%;
+    max-width: 1100px;
+    height: 360px; /* Aumentado ligeiramente para dar mais área útil */
+    margin: 20px auto 0 auto;
+    display: flex;
+    
+    /* Mudamos para space-between para empurrar os blocos mais para as pontas */
+    justify-content: space-between; 
+    align-items: flex-start;
+    
+    /* Adicionamos 80px nas laterais para que eles não colem nas bordas externas */
+    padding: 20px 80px 140px 80px; 
+    
+    border-radius: 30px;
+    position: relative;
+    background: transparent;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* =========================
+ENTIDADES (ATUALIZADO)
+========================= */
+.entity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    
+    /* Aumentamos de 45px para 65px para alinhar os avatares no meio do tronco */
+    margin-top: 65px; 
+}
+.battle-entities{
+    width:100%;
+
+    display:flex;
+    justify-content:space-around;
+    align-items:flex-start;
+
+    margin-top:40px;
+}
+
+    .entity img{
+        width:120px;
+    }
+
+}
+@media (max-width:768px){
+
+    .cards-grid{
+        grid-template-columns:repeat(2,1fr);
+        gap:10px;
+        padding:10px;
+    }
+
+    .collection-card-img{
+        height:140px;
+    }
+
+}
+@media (max-width:768px){
+
+    .modal-content{
+        width:90%;
+        max-height:90vh;
+        overflow-y:auto;
+    }
+
+}
+@media (max-width:768px){
+
+    h1{
+        font-size:1.5rem;
+    }
+
+    .section-title{
+        font-size:1.2rem;
+    }
+
+}
+/* =========================
+MÃO DE CARTAS (ATUALIZADO)
+========================= */
+.hand {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 12px;
+    padding: 10px 15px;
+    min-height: 210px;
+    position: relative;
+    
+    /* Aumentamos consideravelmente aqui para sobrepor a barra de energia */
+    z-index: 1000; 
+    
+    overflow: visible;
+    margin-top: 10px;
+}
+/* --- RESPONSIVIDADE (MOBILE) --- */
+@media (max-width: 768px) {
+    /* 1. Muda o layout principal de lado a lado para empilhado (cima/baixo) */
+    .app-container {
+        flex-direction: column;
+        height: auto; /* Remove a trava de 100vh */
+        min-height: 100vh;
+        overflow-y: auto; /* Permite rolar a página inteira */
+        padding: 10px;
+    }
+
+    /* 2. A barra de hábitos ocupa a largura toda e não fica travada em 350px */
+    .habits-section {
+        flex: none;
+        width: 100%;
+        height: auto; 
+        max-height: 50vh; /* Limita a altura para o jogo não sumir lá embaixo */
+        margin-bottom: 10px;
+    }
+
+    /* 3. A tela de batalha empilha o jogador e inimigo ou aproxima eles */
+    .battle-screen {
+        flex-direction: column;
+        gap: 20px;
+        padding: 15px;
+    }
+
+    /* Reduz um pouco os avatares para economizar espaço */
+    .sprite-container {
+        width: 100px;
+        height: 100px;
+    }
+
+    /* 4. Ajuste das cartas para caberem na tela do celular */
+    :root {
+        --card-width: 80px; /* Cartas menores no mobile */
+        --card-height: 116px;
+    }
+
+    .hand {
+        padding: 10px;
+        height: auto;
+        flex-wrap: wrap; /* Permite que as cartas quebrem linha se houver muitas */
+        justify-content: center;
+        gap: 8px;
+    }
+
+    /* Animação do hover da carta adaptada para não bugar no touch */
+    .card:hover:not(.disabled) { 
+        transform: translateY(-10px); /* Sobe menos no mobile */
+    }
+
+    /* 5. Ajuste dos modais (Login e Minigame) para não vazarem da tela */
+    .login-box, .minigame-container {
+        width: 90%; /* Usa 90% da tela em vez de um tamanho fixo em pixels */
+        padding: 20px;
+    }
+
+    /* 6. Ajuste da HUD de combate (Turno e Status) */
+    .game-controls {
+        flex-direction: column; /* Empilha os status e o botão de turno */
+        gap: 15px;
+        padding: 15px;
+        border-radius: 20px;
+    }
+}

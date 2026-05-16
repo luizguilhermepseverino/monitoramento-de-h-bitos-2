@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HabitGame: Hero's Journey</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+    <style>
+        /* Estilos críticos e correções de layout */
+        .hidden { display: none !important; }
+        
+        /* Containers de Overlay */
+        #parryOverlay, #minigameOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center; 
+            flex-direction: column; z-index: 2000;
+        }
+        
+        #parryOverlay { background: rgba(0,0,0,0.8); }
+        #minigameOverlay { background: rgba(0,0,0,0.95); z-index: 3000; }
+
+        /* Mecânica de Parry */
+        .skill-check-container {
+            position: relative; width: 220px; height: 220px; 
+            border: 6px solid rgba(255,255,255,0.2); border-radius: 50%;
+        }
+        #skillZone {
+            position: absolute; width: 100%; height: 100%; border-radius: 50%;
+            border: 20px solid transparent; border-top-color: #f1c40f;
+            box-sizing: border-box; transition: transform 0.1s;
+        }
+        #skillNeedle {
+            position: absolute; width: 4px; height: 110px; background: #e74c3c;
+            left: 50%; bottom: 50%; transform-origin: bottom center;
+            box-shadow: 0 0 10px #e74c3c; z-index: 5;
+        }
+        .skill-center {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: white; font-weight: bold; text-align: center; font-size: 1.2em;
+            text-shadow: 0 0 10px #000;
+        }
+
+        /* Botão Beta */
+        .beta-btn {
+            background: #f1c40f !important;
+            color: #000 !important;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #9a7d0a !important;
+        }
+
+        /* Minigame UI */
+        #minigameTimerBar {
+            width: 100%; height: 100%; background: #e74c3c; 
+            transition: width 0.1s linear;
+        }
+        #minigameInput {
+            padding: 15px; font-size: 1.5em; text-align: center; 
+            border-radius: 10px; border: 3px solid #9b59b6; width: 60%;
+            background: #111; color: white; outline: none;
+        }
+
+        /* Classes Utilitárias */
+        .text-gold { color: #f1c40f; }
+        .text-danger { color: #e74c3c; font-weight: bold; }
+        .text-center { text-align: center; }
+        .upper { text-transform: uppercase; }
+        .mt-20 { margin-top: 20px; }
+        .mb-15 { margin-bottom: 15px; }
+
+        /* Estilos da Loja */
+        #shopModal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #1a1a2e; padding: 25px; border-radius: 15px;
+            border: 4px solid #f1c40f; z-index: 4000; min-width: 320px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+        .shop-grid { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        .shop-item {
+            background: #16213e; padding: 12px; border-radius: 10px;
+            cursor: pointer; border: 2px solid #0f3460; transition: 0.2s;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .shop-item:hover { border-color: #f1c40f; background: #1b2a4e; }
+        .shop-item.hp { border-left: 5px solid #e74c3c; }
+        .shop-item.energy { border-left: 5px solid #3498db; }
+        .btn-shop-toggle {
+            background: #f1c40f; color: #1a1a2e; font-weight: bold;
+            padding: 10px 20px; border-radius: 8px; border: none;
+            cursor: pointer; box-shadow: 0 4px 0 #9a7d0a; font-family: inherit;
+        }
+
+        /* Ajuste do Seletor de Dias Semanais */
+        #weekDaysSelector {
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+        }
+        #weekDaysSelector label { font-size: 0.8em; color: #eee; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="shopModal" class="hidden">
+        <h2 class="text-gold upper">🏪 Mercado do Viajante</h2>
+        <p style="color: #bdc3c7;">Moedas: <span class="text-gold" style="font-weight: bold;">💰 <span id="goldValue">0</span></span></p>
+        
+        <div class="shop-grid">
+            <div class="shop-item hp" onclick="buyItem('hp', 50)">
+                <div style="text-align: left;">
+                    <div style="color: #ff7675; font-weight: bold;">Poção de Vida</div>
+                    <div style="font-size: 0.8em; color: #eee;">Recupera 50 de Vida</div>
+                </div>
+                <div class="text-gold">💰 50</div>
+            </div>
+
+            <div class="shop-item energy" onclick="buyItem('energy', 30)">
+                <div style="text-align: left;">
+                    <div style="color: #74b9ff; font-weight: bold;">Poção de Energia</div>
+                    <div style="font-size: 0.8em; color: #eee;">+3 Energia na Reserva</div>
+                </div>
+                <div class="text-gold">💰 30</div>
+            </div>
+        </div>
+
+        <button onclick="toggleShop()" class="btn-main mt-20" style="background: #95a5a6; box-shadow: 0 4px 0 #7f8c8d;">Voltar ao Jogo</button>
+    </div>
+
+    <div id="parryOverlay" class="hidden">
+        <h2 class="text-gold upper mb-15">Apare o Golpe!</h2>
+        <div class="skill-check-container">
+            <div id="skillZone"></div>
+            <div id="skillNeedle"></div>
+            <div class="skill-center">CLIQUE NO<br>AMARELO!</div>
+        </div>
+        <p class="mt-20" style="color: white;">Sucesso: 50% de dano | Falha: 100% de dano</p>
+    </div>
+
+    <div id="minigameOverlay" class="hidden">
+        <h1 id="minigameTitle" class="upper" style="color: #9b59b6; font-size: 2.5em;">Experimento Mortal!</h1>
+        <p id="minigamePrompt" style="color: white; font-size: 2em; margin: 20px 0; font-weight: bold;"></p>
+        <input type="text" id="minigameInput" autocomplete="off" placeholder="Digite aqui...">
+        
+        <div style="width: 60%; background: #222; height: 20px; margin-top: 30px; border-radius: 10px; overflow: hidden; border: 2px solid #555;">
+            <div id="minigameTimerBar"></div>
+        </div>
+        <p class="text-danger mt-20">⚠️ CUIDADO: Errar ou demorar causa 50 de DANO CRÍTICO!</p>
+    </div>
+
+    <div id="loginScreen" class="overlay">
+        <div class="login-box">
+            <h1>Habit</h1>
+            <p>Acesse sua conta de Herói</p>
+            
+            <input type="text" id="userName" placeholder="Nome do usuário">
+            
+            <select id="userGender" class="login-input">
+                <option value="" disabled selected>Escolha seu Gênero</option>
+                <option value="Masculino">Homem</option>
+                <option value="Feminino">Mulher</option>
+            </select>
+
+            <input type="email" id="userEmail" placeholder="E-mail (@gmail.com)">
+            <input type="password" id="userPass" placeholder="Senha">
+            
+            <button onclick="login()" class="btn-main">Entrar na Jornada</button>
+        </div>
+    </div>
+
+<main class="app-container hidden" id="mainApp">
+
+    <aside class="main-sidebar">
+
+        <div class="sidebar-logo">
+            <h2>⚔ HabitQuest</h2>
+        </div>
+
+        <nav class="sidebar-menu">
+
+            <button class="sidebar-btn active" data-screen="habits">
+                <span>📋</span>
+                Hábitos
+            </button>
+
+            <button class="sidebar-btn" data-screen="history">
+                <span>📈</span>
+                Histórico
+            </button>
+
+            <button class="sidebar-btn" data-screen="battle">
+                <span>⚔️</span>
+                Batalha
+            </button>
+
+            <button class="sidebar-btn" data-screen="cards">
+                <span>🃏</span>
+                Cartas
+            </button>
+
+            <button class="sidebar-btn" data-screen="shop">
+                <span>🛒</span>
+                Loja
+            </button>
+
+            <button class="sidebar-btn" data-screen="config">
+                <span>⚙️</span>
+                Config
+            </button>
+
+        </nav>
+
+    </aside>
+
+        
+        <section class="habits-section screen active-screen" id="screen-habits">
+            <header class="sidebar-header">
+
+    <div class="date-control">
+        <span class="current-day" id="currentDayDisplay">
+            📅 Segunda-feira
+        </span>
+
+        <button class="btn-advance" onclick="nextDay()">
+            Avançar Dia ⮕
+        </button>
+    </div>
+
+    <div class="energy-top-area">
+
+<button class="tab-btn beta-btn" id="btn-beta-tester">
+    Beta tester
+</button>
+
+        <div class="energy-info-box text-center">
+            <span id="energyBankDisplay"
+                class="text-gold"
+                style="font-weight:bold;font-size:1.1em;">
+                Reserva: 0⚡
+            </span>
+        </div>
+
+    </div>
+
+</header>
+
+<button onclick="abrirModalHabito()" class="btn-sugestao mb-15" style="background: #4a90e2; box-shadow: 0 4px 0 #2980b9; width: 100%;">
+    ➕ Novo Hábito
+</button>
+
+<div id="modalNovoHabito" class="modal-overlay hidden">
+    <div id="habitMenu" class="modal-content">
+        <h2 class="section-title text-center" style="margin-top: 0;">✨ Novo Hábito</h2>
+        
+        <button onclick="toggleSuggestions()" class="btn-sugestao mb-15">💡 Ver Sugestões</button>
+        <div id="suggestionBox" class="suggestion-list hidden"></div>
+        
+        <div class="input-group" style="margin-bottom: 15px;">
+            <input type="text" id="habitInput" placeholder="Ex: Treinar, Estudar..." style="width: 100%; padding: 10px; border-radius: 8px; background: #1a1a2e; color: white; border: 1px solid #0f3460;">
+            
+            <textarea 
+    id="habitDescription"
+    placeholder="Descrição do hábito..."
+    style="
+        width:100%;
+        padding:10px;
+        border-radius:8px;
+        background:#1a1a2e;
+        color:white;
+        border:1px solid #0f3460;
+        margin-top:10px;
+        min-height:90px;
+        resize:none;
+    ">
+</textarea>
+            <div class="emoji-picker" id="iconSelector" style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                <span class="emoji-item selected" data-icon="🏃">🏃</span>
+                <span class="emoji-item" data-icon="💧">💧</span>
+                <span class="emoji-item" data-icon="📚">📚</span>
+                <span class="emoji-item" data-icon="🍎">🍎</span>
+                <span class="emoji-item" data-icon="🧘">🧘</span>
+            </div>
+        </div>
+
+        <select id="habitDifficulty" style="width: 100%; padding: 10px; border-radius: 8px; background: #1a1a2e; color: white; border: 1px solid #0f3460; margin-bottom: 15px;">
+            <option value="3">Fácil (3 ⚡)</option>
+            <option value="4">Médio (4 ⚡)</option>
+            <option value="5" selected>Difícil (5 ⚡)</option>
+        </select>
+
+        <select id="habitType" onchange="toggleDaysSelector()" style="width: 100%; padding: 10px; border-radius: 8px; background: #1a1a2e; color: white; border: 1px solid #0f3460; margin-bottom: 15px;">
+            <option value="diario">Diário</option>
+            <option value="semanal">Semanal</option>
+        </select>
+
+        <div id="weekDaysSelector" class="hidden">
+            <label><input type="checkbox" class="day-checkbox" value="0"> Seg</label>
+            <label><input type="checkbox" class="day-checkbox" value="1"> Ter</label>
+            <label><input type="checkbox" class="day-checkbox" value="2"> Qua</label>
+            <label><input type="checkbox" class="day-checkbox" value="3"> Qui</label>
+            <label><input type="checkbox" class="day-checkbox" value="4"> Sex</label>
+            <label><input type="checkbox" class="day-checkbox" value="5"> Sáb</label>
+            <label><input type="checkbox" class="day-checkbox" value="6"> Dom</label>
+        </div>
+
+        <button onclick="addHabit()" class="btn-main mt-20">Criar Hábito</button>
+        <button onclick="fecharModalHabito()" class="btn-close-modal mt-20">Cancelar</button>
+    </div>
+</div>
+
+                <h2 class="section-title">Hábitos</h2>
+                <ul id="habitList"></ul>
+
+</section>
+
+<section class="game-section screen" id="screen-battle">
+            <div class="enemy-intent" id="intentBox">
+                Próxima ação: <span id="intentText">???</span>
+            </div>
+            
+            <div class="battle-screen">
+                <div class="entity enemy">
+                    <div id="enemyStatus" class="status-effects"></div>
+                    <div class="sprite-container">
+                        <img src="globin.png" id="enemySprite" alt="Inimigo">
+                    </div>
+                    <div class="hp-bar">
+                        <div id="enemyHp" style="width: 100%;"></div>
+                        <span id="enemyHpText" class="hp-text-overlay">0 / 0</span>
+                    </div>
+                    <span id="enemyNameDisplay">Inimigo</span>
+                    <div id="shieldDisplayEnemy" class="shield-badge">🛡️ 0</div>
+                </div>
+
+                <div class="entity player">
+                    <div class="sprite-container">
+                        <img src="heroi_homem.png" id="playerSprite" alt="Seu Herói">
+                    </div>
+                    <div class="hp-bar">
+                        <div id="playerHp" style="width: 100%;"></div>
+                        <span id="playerHpText" class="hp-text-overlay">100 / 100</span>
+                    </div>
+                    <span id="playerNameDisplay">Herói</span>
+                    <div id="shieldDisplay" class="shield-badge">🛡️ 0</div>
+                </div>
+            </div>
+
+            <div class="text-center" style="margin: 10px 0;">
+                <button id="btnStartBattle" onclick="startBattle()" class="btn-main" style="background: #e74c3c;">
+                    Iniciar Batalha ⚔️
+                </button>
+            </div>
+
+            <footer class="game-controls">
+                <div class="stats">⚡ Energia: <span id="energyStat">0</span></div>
+                <button onclick="endTurn()" class="btn-turn">Finalizar Turno</button>
+            </footer>
+
+            <div class="hand" id="playerHand"></div>
+
+            <div class="text-center" style="margin-top: 15px;">
+                <button onclick="toggleShop()" class="btn-shop-toggle">
+                    🛒 ABRIR LOJA (💰 <span id="btnGoldDisplay">0</span>)
+                </button>
+            </div>
+
+            <p id="battleLog" class="text-center">Cumpra hábitos para carregar sua reserva!</p>
+        </section>
+        <section class="screen" id="screen-history">
+
+    <header class="sidebar-header">
+        <h1 class="section-title">📈 Histórico</h1>
+    </header>
+
+    <div class="chart-container">
+        <canvas id="habitChart"></canvas>
+    </div>
+
+    <h2 class="section-title" style="color: #2ecc71;">
+        ✅ Hábitos Concluídos
+    </h2>
+
+    <ul id="doneHabitList"></ul>
+
+</section>
+
+
+<!-- COLE AQUI -->
+<section class="screen" id="screen-cards">
+
+    <header class="sidebar-header">
+        <h1 class="section-title">🃏 Coleção de Cartas</h1>
+    </header>
+
+    <div id="cardsContainer" class="cards-grid"></div>
+
+</section>
+
+</main>
+    </main>
+
+    <div id="rewardScreen" class="overlay hidden">
+        <div class="login-box" style="border: 2px solid #f1c40f;">
+            <h1 class="text-gold">🏆 Vitória!</h1>
+            <p style="color: #fff;">Você encontrou uma nova técnica:</p>
+            <div id="rewardCardDisplay" style="margin: 20px 0;"></div>
+            <button onclick="claimReward()" class="btn-main">Confirmar e Avançar</button>
+        </div>
+    </div>
+
+   <script src="script.js"></script>
+
+<script>
+
+// Funções rápidas de controle de UI
+function toggleShop() {
+    document.getElementById('shopModal').classList.toggle('hidden');
+}
+
+// Inicializa os emojis ao carregar
+window.onload = () => {
+
+    if (typeof setupEmojiSelection === "function") {
+        setupEmojiSelection();
+    }
+
+    // Sistema de troca de telas
+    const sidebarButtons = document.querySelectorAll('.sidebar-btn');
+    const screens = document.querySelectorAll('.screen');
+
+    sidebarButtons.forEach(button => {
+
+        button.addEventListener('click', () => {
+
+            const target = button.dataset.screen;
+
+            // remove active dos botões
+            sidebarButtons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // esconde telas
+            screens.forEach(screen => {
+                screen.classList.remove('active-screen');
+            });
+
+            // ativa botão clicado
+            button.classList.add('active');
+
+            // mostra tela correta
+            const targetScreen = document.getElementById(`screen-${target}`);
+
+            if(targetScreen){
+                targetScreen.classList.add('active-screen');
+            }
+
+        });
+
+    });
+
+};
+
+</script>
