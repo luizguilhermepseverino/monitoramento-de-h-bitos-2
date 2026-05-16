@@ -1604,15 +1604,6 @@ GRÁFICO / HISTÓRICO
 
     image-rendering: auto;
 }
-html, body {
-    height: 100%;
-    overflow: hidden;
-}
-
-.app-container {
-    height: 100vh;
-    overflow: hidden;
-}
 
 .main-content {
     height: 100vh;
@@ -1956,332 +1947,36 @@ html, body {
 
 
 
-/*Mobile*/
-@media (max-width: 768px){
-
-    .main-sidebar{
-        width:100%;
-        height:auto;
-        display:flex;
-        position:fixed;
-        bottom:0;
-        left:0;
-        z-index:999;
-    }
-
-    .sidebar-menu{
-        display:flex;
-        flex-direction:row;
-        width:100%;
-    }
-
-}
-@media (max-width:768px){
-/* =========================
-BATTLE SCREEN (CORRIGIDO)
-========================= */
-
-/* =========================
-BATTLE SCREEN (ATUALIZADO)
-========================= */
-.battle-screen {
-    width: 100%;
-    max-width: 1100px;
-    height: 360px; /* Aumentado ligeiramente para dar mais área útil */
-    margin: 20px auto 0 auto;
-    display: flex;
-    
-    /* Mudamos para space-between para empurrar os blocos mais para as pontas */
-    justify-content: space-between; 
-    align-items: flex-start;
-    
-    /* Adicionamos 80px nas laterais para que eles não colem nas bordas externas */
-    padding: 20px 80px 140px 80px; 
-    
-    border-radius: 30px;
-    position: relative;
-    background: transparent;
-    overflow: hidden;
-    box-sizing: border-box;
-}
-
-/* =========================
-ENTIDADES (ATUALIZADO)
-========================= */
-.entity {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    
-    /* Aumentamos de 45px para 65px para alinhar os avatares no meio do tronco */
-    margin-top: 65px; 
-}
-.battle-entities{
-    width:100%;
-
-    display:flex;
-    justify-content:space-around;
-    align-items:flex-start;
-
-    margin-top:40px;
-}
-
-    .entity img{
-        width:120px;
-    }
-
-}
-@media (max-width:768px){
-
-    .cards-grid{
-        grid-template-columns:repeat(2,1fr);
-        gap:10px;
-        padding:10px;
-    }
-
-    .collection-card-img{
-        height:140px;
-    }
-
-}
-@media (max-width:768px){
-
-    .modal-content{
-        width:90%;
-        max-height:90vh;
-        overflow-y:auto;
-    }
-
-}
-@media (max-width:768px){
-
-    h1{
-        font-size:1.5rem;
-    }
-
-    .section-title{
-        font-size:1.2rem;
-    }
-
-}
-/* =========================
-MÃO DE CARTAS (ATUALIZADO)
-========================= */
-.hand {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    gap: 12px;
-    padding: 10px 15px;
-    min-height: 210px;
-    position: relative;
-    
-    /* Aumentamos consideravelmente aqui para sobrepor a barra de energia */
-    z-index: 1000; 
-    
-    overflow: visible;
-    margin-top: 10px;
-}
-/* =========================================
-   MOBILE FIX DEFINITIVO
-========================================= */
 @media (max-width:768px){
 
     html,
     body{
         width:100%;
-        min-height:100vh;
+        margin:0;
+        padding:0;
+
+        min-height:100dvh;
 
         overflow-x:hidden;
-        overflow-y:auto !important;
+        overflow-y:auto;
 
-        height:auto !important;
+        background:#050816;
     }
 
-    body{
-        display:block;
-    }
-
-    /* APP */
     .app-container{
+        width:100%;
+        min-height:100dvh;
+
         display:flex;
         flex-direction:column;
-
-        width:100%;
-        min-height:100vh;
-
-        height:auto !important;
-
-        overflow:visible !important;
 
         padding:10px;
-        padding-bottom:120px;
+        padding-bottom:100px;
 
-        gap:15px;
+        overflow:visible;
     }
 
-    /* SCREENS */
-    .screen,
-    .screen.active-screen{
-        width:100%;
-        height:auto !important;
-        min-height:auto !important;
-
-        overflow:visible !important;
-    }
-
-    /* HÁBITOS */
-    .habits-section{
-        width:100% !important;
-        min-width:100% !important;
-        max-width:100% !important;
-
-        height:auto !important;
-        min-height:auto !important;
-
-        overflow:visible !important;
-
-        padding:15px;
-    }
-
-    #tab-pending,
-    #tab-history{
-        overflow:visible !important;
-        height:auto !important;
-        max-height:none !important;
-    }
-
-    /* GAME SECTION */
-    .game-section{
-        width:100% !important;
-
-        display:flex !important;
-        flex-direction:column;
-
-        height:auto !important;
-        min-height:auto !important;
-
-        overflow:visible !important;
-
-        padding:10px 0;
-    }
-
-    /* BATALHA */
-    .battle-screen{
-        width:100%;
-
-        height:auto !important;
-
-        display:flex;
-        flex-direction:column;
-
-        align-items:center;
-        justify-content:flex-start;
-
-        gap:30px;
-
-        padding:20px 10px 20px 10px;
-
-        overflow:visible !important;
-    }
-
-    .battle-entities{
-        width:100%;
-
-        display:flex;
-        justify-content:space-between;
-        align-items:flex-start;
-
-        padding:0 10px;
-
-        margin-top:0;
-    }
-
-    .entity{
-        margin-top:0;
-    }
-
-    .entity img{
-        width:90px;
-    }
-
-    /* HUD */
-    .game-controls{
-        width:100%;
-
-        flex-wrap:wrap;
-
-        justify-content:center;
-
-        gap:15px;
-
-        padding:15px;
-
-        border-radius:20px;
-    }
-
-    /* CARTAS */
-    .hand{
-        width:100%;
-
-        display:flex;
-
-        flex-wrap:wrap;
-
-        justify-content:center;
-
-        align-items:flex-start;
-
-        gap:8px;
-
-        padding:10px 5px 30px 5px;
-
-        min-height:auto !important;
-
-        overflow:visible !important;
-    }
-
-    .card{
-        width:78px;
-        height:115px;
-    }
-
-    .card-image{
-        width:78px;
-        height:115px;
-    }
-
-    .card-tooltip{
-        max-width:140px;
-        font-size:0.72rem;
-    }
-
-    /* MODAL */
-    .modal-overlay{
-        padding:15px;
-        align-items:flex-start;
-
-        overflow-y:auto;
-    }
-
-    .modal-content{
-        position:relative !important;
-
-        top:auto !important;
-        left:auto !important;
-
-        transform:none !important;
-
-        width:100% !important;
-        max-width:100% !important;
-
-        margin-top:20px;
-
-        padding:20px;
-    }
-
-    /* SIDEBAR MOBILE */
+    /* SIDEBAR */
     .main-sidebar{
         position:fixed;
 
@@ -2289,41 +1984,70 @@ MÃO DE CARTAS (ATUALIZADO)
         left:0;
 
         width:100%;
-        height:85px;
-
-        padding:10px;
+        height:75px;
 
         z-index:9999;
+
+        background:#08111f;
+
+        border-top:1px solid rgba(255,255,255,0.08);
     }
 
     .sidebar-menu{
-        width:100%;
-
         display:flex;
         flex-direction:row;
 
         justify-content:space-around;
+        align-items:center;
 
-        gap:8px;
+        width:100%;
+        height:100%;
     }
 
     .sidebar-btn{
         flex:1;
 
+        display:flex;
         justify-content:center;
+        align-items:center;
+
+        padding:8px;
+    }
+
+    /* SCREENS */
+    .screen{
+        display:none;
+        width:100%;
+    }
+
+    .screen.active-screen{
+        display:flex;
+        flex-direction:column;
+        width:100%;
+    }
+
+    /* HABITS */
+    .habits-section{
+        width:100%;
+        min-width:100%;
+        max-width:100%;
+
+        height:auto;
+
+        overflow:visible;
 
         padding:10px;
     }
 
-    /* HÁBITOS */
+    #habitList{
+        padding:10px 0;
+    }
+
     .habit-item{
         width:100%;
-
-        padding:14px;
-
         min-height:auto;
 
-        align-items:flex-start;
+        padding:14px;
 
         gap:12px;
     }
@@ -2338,6 +2062,108 @@ MÃO DE CARTAS (ATUALIZADO)
 
     .habit-details{
         font-size:0.8rem;
+    }
+
+    /* BATALHA */
+    #screen-battle.active-screen{
+        overflow-y:auto;
+
+        padding-bottom:120px;
+    }
+
+    .battle-screen{
+        width:100%;
+
+        display:flex;
+        flex-direction:column;
+
+        align-items:center;
+
+        gap:20px;
+
+        padding:20px 0;
+    }
+
+    .battle-entities{
+        width:100%;
+
+        display:flex;
+        flex-direction:column;
+
+        align-items:center;
+
+        gap:25px;
+
+        margin-top:0;
+    }
+
+    .entity{
+        margin-top:0;
+
+        display:flex;
+        flex-direction:column;
+
+        align-items:center;
+    }
+
+    .entity img{
+        width:90px;
+        height:90px;
+
+        object-fit:cover;
+    }
+
+    /* HUD */
+    .game-controls{
+        width:95%;
+
+        display:flex;
+        flex-direction:column;
+
+        align-items:center;
+
+        gap:12px;
+
+        padding:15px;
+
+        border-radius:20px;
+    }
+
+    /* CARTAS */
+    .hand{
+        width:100%;
+
+        display:flex;
+        justify-content:center;
+
+        flex-wrap:wrap;
+
+        gap:8px;
+
+        padding:10px;
+    }
+
+    .card{
+        width:72px;
+        height:105px;
+    }
+
+    .card-image{
+        width:100%;
+        height:100%;
+    }
+
+    /* MODAL */
+    .modal-content{
+        width:95%;
+        max-width:95%;
+
+        left:50%;
+        top:50%;
+
+        transform:translate(-50%, -50%);
+
+        padding:20px;
     }
 
 }
