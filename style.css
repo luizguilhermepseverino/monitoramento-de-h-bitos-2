@@ -2083,84 +2083,83 @@ MÃO DE CARTAS (ATUALIZADO)
     overflow: visible;
     margin-top: 10px;
 }
-/* --- RESPONSIVIDADE (MOBILE) CORRIGIDA --- */
+/* =========================================
+   RESPONSIVIDADE - CELULARES (MOBILE)
+   ========================================= */
 @media (max-width: 768px) {
-    /* 1. Trava a tela para não vazar para os lados */
-    body, html {
+    /* 1. Libera o scroll da página e tira a trava de tela cheia */
+    body {
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto !important; /* Permite rolar a tela toda */
         overflow-x: hidden;
-        width: 100%;
+        display: block; /* Tira o flex principal que espreme tudo */
     }
 
-    /* Força todos os elementos a incluírem bordas e paddings no cálculo da largura */
     * {
         box-sizing: border-box !important;
     }
 
-    /* 2. Ajuste do Container Principal */
     .app-container {
-        flex-direction: column;
+        display: block; /* Empilha os elementos naturalmente */
         height: auto;
-        min-height: 100vh;
-        overflow-y: auto;
-        overflow-x: hidden;
         padding: 10px;
-        padding-bottom: 90px; /* Dá espaço para o seu menu inferior não cobrir o conteúdo */
-        gap: 15px;
+        padding-bottom: 110px; /* ESPAÇO VITAL para o seu menu inferior não cobrir as coisas */
         width: 100vw;
     }
 
-    /* 3. Conserta o vazamento das caixas principais (Imagens 1 e 2) */
-    .habits-section, .game-section, section {
+    /* 2. Arruma a lista de hábitos (Hábito "Estudar" cortado) */
+    .habits-section {
         width: 100% !important;
-        max-width: 100% !important;
-        flex: none; 
-        padding: 15px; /* Reduz o padding para ganhar espaço nas laterais */
-        margin: 0;
+        max-width: 100%;
+        height: auto; /* Remove o 100vh que estava cortando o layout */
+        min-height: 50vh;
+        margin-bottom: 20px; 
+        flex: none;
     }
 
-    /* 4. Conserta o Modal de Novo Hábito vazando (Imagem 2) */
-    .habit-creator {
-        width: 100%;
-        padding: 15px 10px;
+    #tab-pending, #tab-history {
+        overflow-y: visible; /* Deixa o scroll natural da página agir */
     }
 
-    /* Sobrescreve larguras fixas dos inputs no mobile */
-    #habitInput, .login-input, select {
+    /* 3. Arruma a tela de Batalha (Cartas cortadas) */
+    .game-section {
         width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 0 10px 0 !important; /* Tira margens laterais automáticas que empurram o input */
-    }
-
-    /* 5. Conserta a tela de Batalha espremida (Imagem 3) */
-    .battle-screen {
-        width: 100% !important;
-        max-width: 100% !important;
-        padding: 15px 10px;
-        flex-direction: column; /* Empilha o Inimigo e o Jogador um em cima do outro */
-        gap: 15px;
-    }
-
-    /* Reduz as fotos dos personagens para caber na tela empilhada */
-    .sprite-container {
-        width: 90px;
-        height: 90px;
-    }
-
-    /* 6. Ajuste das cartas para celular */
-    :root {
-        --card-width: 70px;
-        --card-height: 100px;
-    }
-
-    .hand {
-        padding: 5px;
         height: auto;
-        flex-wrap: wrap; /* Cartas quebram linha se não couberem */
+        flex: none;
+        padding: 10px;
+    }
+
+    .battle-screen {
+        flex-direction: column; /* Coloca o inimigo em cima e o jogador embaixo */
+        padding: 15px;
+        gap: 20px;
+        width: 100%;
+    }
+
+    /* 4. Ajuste da Mão de Cartas */
+    .hand {
+        height: auto; /* Tira a altura fixa de 210px que estava limitando o espaço */
+        flex-wrap: wrap; /* Faz as cartas quebrarem linha organizadamente */
         justify-content: center;
-        gap: 6px;
+        gap: 8px;
+        padding: 10px 0;
+    }
+
+    /* Diminui o tamanho das cartas só no celular pra caberem mais na tela */
+    :root {
+        --card-width: 75px;
+        --card-height: 110px;
+    }
+
+    /* Ajusta o ícone de custo de energia da carta para não ficar gigante nela pequena */
+    .card-cost {
+        width: 22px; 
+        height: 22px;
+        font-size: 11px;
     }
 
     .card:hover:not(.disabled) { 
-        transform: translateY(-5px); /* Animação mais suave para não bugar o touch */
+        transform: translateY(-10px); /* Animação menor pra não travar no celular */
     }
 }
