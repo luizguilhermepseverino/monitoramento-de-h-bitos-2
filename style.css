@@ -1902,7 +1902,41 @@ GRÁFICO / HISTÓRICO
     cursor: pointer !important;
 }
 
+/* ==========================================
+MÃO DE CARTAS
+========================================== */
 
+.hand{
+    width:100%;
+
+    display:flex;
+
+    flex-direction:row; /* deixa horizontal */
+
+    justify-content:center;
+
+    align-items:flex-end;
+
+    gap:15px;
+
+    flex-wrap:nowrap;
+
+    padding:20px;
+
+    box-sizing:border-box;
+}
+.card{
+    width:100px;
+    height:145px;
+
+    position:relative;
+
+    overflow:visible;
+
+    flex-shrink:0;
+
+    transition:0.2s ease;
+}
 
 
 
@@ -2128,26 +2162,27 @@ GRÁFICO / HISTÓRICO
 
         border-radius:20px;
     }
+/* CARTAS */
+.hand {
+    width: 100%;
+    display: flex;
+    flex-direction: row;   /* Garante o alinhamento horizontal */
+    justify-content: center;
+    flex-wrap: nowrap;     /* Impede as cartas de pularem para a linha de baixo */
+    gap: 8px;
+    padding: 10px;
+    box-sizing: border-box; /* Evita que o padding estoure o tamanho da tela */
+    
+    /* FORÇA A LARGURA: Mesmo que o pai tente centralizar e encolher este container, 
+       isso obriga ele a esticar de ponta a ponta da tela */
+    align-self: stretch; 
+}
 
-    /* CARTAS */
-    .hand{
-        width:100%;
-
-        display:flex;
-        justify-content:center;
-
-        flex-wrap:wrap;
-
-        gap:8px;
-
-        padding:10px;
-    }
-
-    .card{
-        width:72px;
-        height:105px;
-    }
-
+.card {
+    width: 72px;
+    height: 105px;
+    flex-shrink: 0; /* Impede que as cartas fiquem "esmagadas" se a tela for pequena */
+}
     .card-image{
         width:100%;
         height:100%;
