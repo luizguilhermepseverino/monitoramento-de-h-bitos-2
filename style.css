@@ -2083,69 +2083,84 @@ MÃO DE CARTAS (ATUALIZADO)
     overflow: visible;
     margin-top: 10px;
 }
-/* --- RESPONSIVIDADE (MOBILE) --- */
+/* --- RESPONSIVIDADE (MOBILE) CORRIGIDA --- */
 @media (max-width: 768px) {
-    /* 1. Muda o layout principal de lado a lado para empilhado (cima/baixo) */
+    /* 1. Trava a tela para não vazar para os lados */
+    body, html {
+        overflow-x: hidden;
+        width: 100%;
+    }
+
+    /* Força todos os elementos a incluírem bordas e paddings no cálculo da largura */
+    * {
+        box-sizing: border-box !important;
+    }
+
+    /* 2. Ajuste do Container Principal */
     .app-container {
         flex-direction: column;
-        height: auto; /* Remove a trava de 100vh */
+        height: auto;
         min-height: 100vh;
-        overflow-y: auto; /* Permite rolar a página inteira */
+        overflow-y: auto;
+        overflow-x: hidden;
         padding: 10px;
+        padding-bottom: 90px; /* Dá espaço para o seu menu inferior não cobrir o conteúdo */
+        gap: 15px;
+        width: 100vw;
     }
 
-    /* 2. A barra de hábitos ocupa a largura toda e não fica travada em 350px */
-    .habits-section {
-        flex: none;
+    /* 3. Conserta o vazamento das caixas principais (Imagens 1 e 2) */
+    .habits-section, .game-section, section {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: none; 
+        padding: 15px; /* Reduz o padding para ganhar espaço nas laterais */
+        margin: 0;
+    }
+
+    /* 4. Conserta o Modal de Novo Hábito vazando (Imagem 2) */
+    .habit-creator {
         width: 100%;
-        height: auto; 
-        max-height: 50vh; /* Limita a altura para o jogo não sumir lá embaixo */
-        margin-bottom: 10px;
+        padding: 15px 10px;
     }
 
-    /* 3. A tela de batalha empilha o jogador e inimigo ou aproxima eles */
+    /* Sobrescreve larguras fixas dos inputs no mobile */
+    #habitInput, .login-input, select {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 0 10px 0 !important; /* Tira margens laterais automáticas que empurram o input */
+    }
+
+    /* 5. Conserta a tela de Batalha espremida (Imagem 3) */
     .battle-screen {
-        flex-direction: column;
-        gap: 20px;
-        padding: 15px;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 15px 10px;
+        flex-direction: column; /* Empilha o Inimigo e o Jogador um em cima do outro */
+        gap: 15px;
     }
 
-    /* Reduz um pouco os avatares para economizar espaço */
+    /* Reduz as fotos dos personagens para caber na tela empilhada */
     .sprite-container {
-        width: 100px;
-        height: 100px;
+        width: 90px;
+        height: 90px;
     }
 
-    /* 4. Ajuste das cartas para caberem na tela do celular */
+    /* 6. Ajuste das cartas para celular */
     :root {
-        --card-width: 80px; /* Cartas menores no mobile */
-        --card-height: 116px;
+        --card-width: 70px;
+        --card-height: 100px;
     }
 
     .hand {
-        padding: 10px;
+        padding: 5px;
         height: auto;
-        flex-wrap: wrap; /* Permite que as cartas quebrem linha se houver muitas */
+        flex-wrap: wrap; /* Cartas quebram linha se não couberem */
         justify-content: center;
-        gap: 8px;
+        gap: 6px;
     }
 
-    /* Animação do hover da carta adaptada para não bugar no touch */
     .card:hover:not(.disabled) { 
-        transform: translateY(-10px); /* Sobe menos no mobile */
-    }
-
-    /* 5. Ajuste dos modais (Login e Minigame) para não vazarem da tela */
-    .login-box, .minigame-container {
-        width: 90%; /* Usa 90% da tela em vez de um tamanho fixo em pixels */
-        padding: 20px;
-    }
-
-    /* 6. Ajuste da HUD de combate (Turno e Status) */
-    .game-controls {
-        flex-direction: column; /* Empilha os status e o botão de turno */
-        gap: 15px;
-        padding: 15px;
-        border-radius: 20px;
+        transform: translateY(-5px); /* Animação mais suave para não bugar o touch */
     }
 }
