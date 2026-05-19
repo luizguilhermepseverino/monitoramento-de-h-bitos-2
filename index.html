@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HabitGame: Hero's Journey</title>
+
     <link rel="stylesheet" href="style.css">
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="script.js"></script>
+
     <style>
         /* Estilos críticos e correções de layout */
         .hidden { display: none !important; }
@@ -102,6 +104,45 @@
             gap: 5px;
         }
         #weekDaysSelector label { font-size: 0.8em; color: #eee; cursor: pointer; }
+        #upgradeScreen{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #1a1a2e;
+    padding: 25px;
+    border-radius: 15px;
+    border: 4px solid #f1c40f;
+    z-index: 5000;
+    width: 80%;
+    max-width: 900px;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+}
+
+.upgrade-card{
+    width: 180px;
+    background: #16213e;
+    border: 2px solid #0f3460;
+    border-radius: 12px;
+    padding: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    text-align: center;
+}
+
+.upgrade-card:hover{
+    transform: scale(1.05);
+    border-color: #f1c40f;
+}
+
+.upgrade-card img{
+    width: 100%;
+    border-radius: 10px;
+}
     </style>
 </head>
 <body>
@@ -168,7 +209,7 @@
             <input type="email" id="userEmail" placeholder="E-mail (@gmail.com)">
             <input type="password" id="userPass" placeholder="Senha">
             
-            <button onclick="login()" class="btn-main">Entrar na Jornada</button>
+<button onclick="login()" class="btn-main">Entrar na Jornada</button>
         </div>
     </div>
 
@@ -255,34 +296,22 @@
 <div id="modalNovoHabito" class="modal-overlay hidden">
     <div id="habitMenu" class="modal-content">
         <h2 class="section-title text-center" style="margin-top: 0;">✨ Novo Hábito</h2>
-        
-        <button onclick="toggleSuggestions()" class="btn-sugestao mb-15">💡 Ver Sugestões</button>
-        <div id="suggestionBox" class="suggestion-list hidden"></div>
+
         
         <div class="input-group" style="margin-bottom: 15px;">
             <input type="text" id="habitInput" placeholder="Ex: Treinar, Estudar..." style="width: 100%; padding: 10px; border-radius: 8px; background: #1a1a2e; color: white; border: 1px solid #0f3460;">
             
-            <textarea 
-    id="habitDescription"
-    placeholder="Descrição do hábito..."
-    style="
-        width:100%;
-        padding:10px;
-        border-radius:8px;
-        background:#1a1a2e;
-        color:white;
-        border:1px solid #0f3460;
-        margin-top:10px;
-        min-height:90px;
-        resize:none;
-    ">
-</textarea>
+<textarea
+id="habitDescription"
+placeholder="Descrição do hábito..."
+></textarea>
             <div class="emoji-picker" id="iconSelector" style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
                 <span class="emoji-item selected" data-icon="🏃">🏃</span>
                 <span class="emoji-item" data-icon="💧">💧</span>
                 <span class="emoji-item" data-icon="📚">📚</span>
                 <span class="emoji-item" data-icon="🍎">🍎</span>
                 <span class="emoji-item" data-icon="🧘">🧘</span>
+                <span class="emoji-item" data-icon="🛒">🛒</span>
             </div>
         </div>
 
@@ -318,78 +347,116 @@
 </section>
 
 <section class="game-section screen" id="screen-battle">
-            <div class="enemy-intent" id="intentBox">
-                Próxima ação: <span id="intentText">???</span>
+    <div class="enemy-intent" id="intentBox">
+        Próxima ação: <span id="intentText">???</span>
+    </div>
+    
+    <div class="battle-screen">
+        <div class="entity enemy">
+            <div id="enemyStatus" class="status-effects"></div>
+            <div class="sprite-container">
+                <img src="globin.png" id="enemySprite" alt="Inimigo">
             </div>
-            
-            <div class="battle-screen">
-                <div class="entity enemy">
-                    <div id="enemyStatus" class="status-effects"></div>
-                    <div class="sprite-container">
-                        <img src="globin.png" id="enemySprite" alt="Inimigo">
-                    </div>
-                    <div class="hp-bar">
-                        <div id="enemyHp" style="width: 100%;"></div>
-                        <span id="enemyHpText" class="hp-text-overlay">0 / 0</span>
-                    </div>
-                    <span id="enemyNameDisplay">Inimigo</span>
-                    <div id="shieldDisplayEnemy" class="shield-badge">🛡️ 0</div>
-                </div>
-
-                <div class="entity player">
-                    <div class="sprite-container">
-                        <img src="heroi_homem.png" id="playerSprite" alt="Seu Herói">
-                    </div>
-                    <div class="hp-bar">
-                        <div id="playerHp" style="width: 100%;"></div>
-                        <span id="playerHpText" class="hp-text-overlay">100 / 100</span>
-                    </div>
-                    <span id="playerNameDisplay">Herói</span>
-                    <div id="shieldDisplay" class="shield-badge">🛡️ 0</div>
-                </div>
+            <div class="hp-bar">
+                <div id="enemyHp" style="width: 100%;"></div>
+                <span id="enemyHpText" class="hp-text-overlay">0 / 0</span>
             </div>
+            <span id="enemyNameDisplay">Inimigo</span>
+            <div id="shieldDisplayEnemy" class="shield-badge">🛡️ 0</div>
+        </div>
 
-            <div class="text-center" style="margin: 10px 0;">
-                <button id="btnStartBattle" onclick="startBattle()" class="btn-main" style="background: #e74c3c;">
-                    Iniciar Batalha ⚔️
-                </button>
+        <div class="entity player">
+            <div class="sprite-container">
+                <img src="heroi_homem.png" id="playerSprite" alt="Seu Herói">
             </div>
-
-            <footer class="game-controls">
-                <div class="stats">⚡ Energia: <span id="energyStat">0</span></div>
-                <button onclick="endTurn()" class="btn-turn">Finalizar Turno</button>
-            </footer>
-
-            <div class="hand" id="playerHand"></div>
-
-            <div class="text-center" style="margin-top: 15px;">
-                <button onclick="toggleShop()" class="btn-shop-toggle">
-                    🛒 ABRIR LOJA (💰 <span id="btnGoldDisplay">0</span>)
-                </button>
+            <div class="hp-bar">
+                <div id="playerHp" style="width: 100%;"></div>
+                <span id="playerHpText" class="hp-text-overlay">100 / 100</span>
             </div>
+            <span id="playerNameDisplay">Herói</span>
+            <div id="shieldDisplay" class="shield-badge">🛡️ 0</div>
+        </div>
+    </div>
 
-            <p id="battleLog" class="text-center">Cumpra hábitos para carregar sua reserva!</p>
-        </section>
-        <section class="screen" id="screen-history">
+    <div id="targetSelectorContainer" style="margin: 15px auto; display: none;"></div>
+
+    <div class="text-center" style="margin: 10px 0;">
+        <button id="btnStartBattle" onclick="tryStartBattle()" class="btn-main" style="background: #e74c3c;">
+            Iniciar Batalha ⚔️
+        </button>
+    </div>
+
+    <footer class="game-controls">
+        <div class="stats">⚡ Energia: <span id="energyStat">0</span></div>
+        <button onclick="endTurn()" class="btn-turn">Finalizar Turno</button>
+    </footer>
+
+    <div class="hand" id="playerHand"></div>
+
+    <div class="text-center" style="margin-top: 15px;">
+        <button onclick="toggleShop()" class="btn-shop-toggle">
+            🛒 ABRIR LOJA (💰 <span id="btnGoldDisplay">0</span>)
+        </button>
+    </div>
+
+    <p id="battleLog" class="text-center">Cumpra hábitos para carregar sua reserva!</p>
+</section>
+<section class="screen" id="screen-history">
 
     <header class="sidebar-header">
         <h1 class="section-title">📈 Histórico</h1>
     </header>
 
-    <div class="chart-container">
-        <canvas id="habitChart"></canvas>
+    <!-- GRÁFICO -->
+    <div class="chart-wrapper">
+
+        <div class="chart-header">
+            <h2>📊 Progresso Semanal</h2>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="habitChart"></canvas>
+        </div>
+
     </div>
 
-    <h2 class="section-title" style="color: #2ecc71;">
-        ✅ Hábitos Concluídos
-    </h2>
+    <!-- STATS -->
+    <div class="stats-grid">
 
-    <ul id="doneHabitList"></ul>
+        <div class="stat-card streak">
+            <h3>🔥 Melhor Streak</h3>
+            <span id="bestStreak">0</span>
+        </div>
 
+        <div class="stat-card energy">
+            <h3>⚡ Energia Gerada</h3>
+            <span id="totalEnergy">0</span>
+        </div>
+
+        <div class="stat-card completed">
+            <h3>✅ Hábitos Concluídos</h3>
+            <span id="completedHabits">0</span>
+        </div>
+
+        <div class="stat-card days">
+            <h3>📅 Dias Consecutivos</h3>
+            <span id="consecutiveDaysDisplay">0</span>
+        </div>
+
+    </div>
+
+    <!-- HISTÓRICO -->
+    <div class="history-panel">
+
+        <h2 class="section-title">📜 Últimas Conclusões</h2>
+
+        <ul id="doneHabitList"></ul>
+
+    </div>
 </section>
-
-
-<!-- COLE AQUI -->
+<!-- ===================================== -->
+<!-- TELA DE CARTAS -->
+<!-- ===================================== -->
 <section class="screen" id="screen-cards">
 
     <header class="sidebar-header">
@@ -400,9 +467,43 @@
 
 </section>
 
-</main>
-    </main>
+<section class="screen" id="screen-shop">
 
+    <header class="sidebar-header">
+        <h1 class="section-title">🛒 Loja</h1>
+    </header>
+
+</section>
+
+</main>
+
+<!-- MODAL DO DECK -->
+<div id="deckModal" class="hidden">
+
+    <div class="deck-modal-content">
+
+        <h2>📚 Deck Atual</h2>
+
+        <div id="deckViewContainer" class="deck-grid"></div>
+
+        <button onclick="toggleDeckView()" class="btn-main">
+            Fechar
+        </button>
+
+    </div>
+
+</div>
+<div id="upgradeScreen" class="overlay hidden">
+        <div class="login-box upgrade-box-premium">
+            <h1 class="text-gold">✨ Altar de Aprimoramento ✨</h1>
+            <p style="color: #b2bec3; font-size: 14px; margin-bottom: 20px;">
+                Selecione uma carta do seu grimório para infundir poder antes do confronto com o Chefe:
+            </p>
+            
+            <div id="upgradeCardDisplay" class="upgrade-grid-container">
+                </div>
+        </div>
+    </div>
     <div id="rewardScreen" class="overlay hidden">
         <div class="login-box" style="border: 2px solid #f1c40f;">
             <h1 class="text-gold">🏆 Vitória!</h1>
@@ -411,24 +512,27 @@
             <button onclick="claimReward()" class="btn-main">Confirmar e Avançar</button>
         </div>
     </div>
+    <div id="upgradeScreen" class="hidden"></div>
 
-   <script src="script.js"></script>
+ <script src="script.js"></script>
 
 <script>
 
-// Funções rápidas de controle de UI
 function toggleShop() {
-    document.getElementById('shopModal').classList.toggle('hidden');
-}
+            if (typeof shopUnlocked !== 'undefined' && !shopUnlocked) {
+                alert("🔒 A loja está trancada! Sobreviva e derrote o Cavaleiro Sombrio ou o Cientista para acessá-la.");
+                return;
+            }
+            document.getElementById('shopModal').classList.toggle('hidden');
+        }
 
-// Inicializa os emojis ao carregar
-window.onload = () => {
+window.addEventListener('DOMContentLoaded', () => {
 
     if (typeof setupEmojiSelection === "function") {
         setupEmojiSelection();
     }
+    renderShop();
 
-    // Sistema de troca de telas
     const sidebarButtons = document.querySelectorAll('.sidebar-btn');
     const screens = document.querySelectorAll('.screen');
 
@@ -438,20 +542,16 @@ window.onload = () => {
 
             const target = button.dataset.screen;
 
-            // remove active dos botões
             sidebarButtons.forEach(btn => {
                 btn.classList.remove('active');
             });
 
-            // esconde telas
             screens.forEach(screen => {
                 screen.classList.remove('active-screen');
             });
 
-            // ativa botão clicado
             button.classList.add('active');
 
-            // mostra tela correta
             const targetScreen = document.getElementById(`screen-${target}`);
 
             if(targetScreen){
@@ -462,6 +562,18 @@ window.onload = () => {
 
     });
 
-};
+});
+function toggleDeckView(){
+
+    const modal = document.getElementById("deckModal");
+
+    modal.classList.toggle("hidden");
+
+    if(!modal.classList.contains("hidden")){
+        renderDeckView();
+    }
+}
 
 </script>
+</body>
+</html>
