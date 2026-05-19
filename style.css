@@ -247,8 +247,8 @@
     }
 
     .section-title {
-        font-size: 1rem;
-        margin-bottom: 15px;
+        font-size: 0.82rem;
+        margin-bottom: 10px;
         display: flex;
         align-items: center;
         gap: 10px;
@@ -633,6 +633,9 @@
         background: #4a90e2;
         color: white;
         border-color: #fff;
+    }
+    .suggestions-btn {
+    display: none;
     }
 
     /* O BOTÃO "CRIAR HÁBITO" (ESTILO HERÓICO) */
@@ -1440,7 +1443,9 @@ CARTAS
     width:100px;
     height:145px;
 
-    border-radius:18px;
+    border-radius:28px;
+
+
 
     overflow:hidden;
 
@@ -1530,8 +1535,8 @@ TOOLTIP
     border: 2px solid #4a90e2;
     border-radius: 20px;
     width: 90%;
-    max-width: 550px;              /* Largura confortável para leitura */
-    padding: 30px;
+    max-width: 500px;              /* Largura confortável para leitura */
+    padding: 24px;
     box-shadow: 0 0 50px rgba(74, 144, 226, 0.3);
     position: fixed;            /* Para elementos internos */
     top:50%;
@@ -1540,9 +1545,55 @@ TOOLTIP
 }
 
 /* Deixar os inputs um pouco maiores para acompanhar o modal */
-#habitInput, #habitDifficulty, #habitType {
-    font-size: 1.1em !important;
-    padding: 15px !important;
+#habitInput,
+#habitDescription{
+    width:100%;
+
+    min-height:55px;
+    max-height:55px;
+
+    padding:12px 14px;
+
+    background:rgba(15,15,25,0.95);
+
+    border:1px solid rgba(74,144,226,0.35);
+
+    border-radius:12px;
+
+    color:white;
+
+    font-size:0.85rem;
+
+    box-sizing:border-box;
+
+    resize:none;
+
+    outline:none;
+
+    transition:0.2s;
+}
+
+#habitDescription:focus{
+    border-color:#4a90e2;
+
+    box-shadow:
+        0 0 0 3px rgba(74,144,226,0.15);
+}
+
+#habitDescription::placeholder{
+    color:#7f8c8d;
+}
+#habitDifficulty,
+#habitType {
+
+    height: 44px;
+
+    padding: 0 12px !important;
+
+    font-size: 0.95rem !important;
+
+    border-radius: 12px;
+
 }
 
 @keyframes slideUpModal {
@@ -1926,23 +1977,265 @@ MÃO DE CARTAS
     box-sizing:border-box;
 }
 .card{
-    width:100px;
+    width:110px;
     height:145px;
+    
 
     position:relative;
-
-    overflow:visible;
+    border-radius:10px; /* arredonda */
+    overflow:visible; /* corta tudo nas bordas */
 
     flex-shrink:0;
 
     transition:0.2s ease;
 }
+/* =========================
+   HISTÓRICO NOVO
+========================= */
 
+.chart-wrapper{
+    background: linear-gradient(180deg,#0f172a,#020617);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:22px;
+    padding:25px;
+    margin-bottom:25px;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
 
+.chart-header{
+    margin-bottom:20px;
+}
 
+.chart-header h2{
+    color:#f1c40f;
+    font-size:1.3rem;
+}
 
+.chart-container{
+    width:100%;
+    height:420px;
+}
 
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:18px;
+    margin-bottom:25px;
+}
 
+.stat-card{
+    background:linear-gradient(180deg,#16213e,#0f172a);
+    border-radius:18px;
+    padding:25px;
+    text-align:center;
+    border:1px solid rgba(255,255,255,.08);
+    transition:.25s;
+}
+
+.stat-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 10px 20px rgba(0,0,0,.3);
+}
+
+.stat-card h3{
+    color:#f1c40f;
+    margin-bottom:15px;
+    font-size:1rem;
+}
+
+.stat-card span{
+    font-size:2.3rem;
+    font-weight:bold;
+    color:white;
+}
+
+.history-panel{
+    background:linear-gradient(180deg,#0f172a,#020617);
+    border-radius:20px;
+    padding:25px;
+    border:1px solid rgba(255,255,255,.08);
+}
+
+#deckButton{
+    position:absolute;
+    bottom:20px;
+    right:20px;
+
+    background:#3498db;
+    color:white;
+
+    border:none;
+    border-radius:12px;
+
+    padding:10px 18px;
+
+    font-weight:bold;
+    cursor:pointer;
+
+    box-shadow:0 4px 0 #21618c;
+
+    z-index:20;
+}
+
+#deckModal{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:5000;
+}
+
+.deck-modal-content{
+    width: 80%;
+    max-width: 900px;
+    max-height: 80vh;
+    overflow-y:auto;
+
+    background:#111827;
+    border:2px solid #3b82f6;
+    border-radius:20px;
+
+    padding:30px;
+}
+
+.deck-grid{
+    display:flex;
+    flex-wrap:wrap;
+    gap:20px;
+    justify-content:center;
+    margin-top:20px;
+}
+
+#deckButton{
+    background:#3498db;
+    border:none;
+    color:white;
+    padding:10px 18px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+}
+#upgradeScreen{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.85);
+    z-index:9999;
+
+    display:flex;
+    flex-wrap:wrap;
+    gap:20px;
+
+    justify-content:center;
+    align-items:center;
+
+    padding:40px;
+    overflow:auto;
+}
+
+#upgradeScreen.hidden{
+    display:none;
+}
+
+.upgrade-card{
+    width:220px;
+    background:#1f1f1f;
+    border:2px solid #555;
+    border-radius:15px;
+    padding:15px;
+    cursor:pointer;
+    transition:.2s;
+    text-align:center;
+    color:white;
+}
+
+.upgrade-card:hover{
+    transform:scale(1.05);
+    border-color:#f1c40f;
+}
+
+.upgrade-card img{
+    width:100%;
+    border-radius:10px;
+}
+/* --- VISUAL PREMIUM DA TELA DE UPGRADE --- */
+.upgrade-box-premium {
+    background: linear-gradient(135deg, #0f111a 0%, #161a24 100%) !important;
+    border: 2px solid #3498db !important;
+    box-shadow: 0 0 30px rgba(52, 152, 219, 0.35), inset 0 0 15px rgba(0,0,0,0.7) !important;
+    border-radius: 12px;
+    width: 95% !important;
+    max-width: 750px !important;
+    padding: 25px !important;
+}
+
+/* Grid organizado e rolável que impede quebras de layout */
+.upgrade-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    max-height: 420px;
+    overflow-y: auto;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Box individual que envelopa a carta + a sua descrição de upgrade */
+.upgrade-card-wrapper {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+.upgrade-card-wrapper:hover {
+    background: rgba(52, 152, 219, 0.08);
+    border-color: #3498db;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+    transform: translateY(-3px);
+}
+
+/* Quando a carta já está no máximo */
+.upgrade-card-wrapper.maxed {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: #e74c3c !important;
+    background: rgba(231, 76, 60, 0.02) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Mini painel de texto interno - Onde o segredo acontece! */
+.upgrade-preview-box {
+    width: 100%;
+    margin-top: 12px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    padding: 8px;
+    box-sizing: border-box;
+    font-size: 11px;
+    line-height: 1.4;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Customização da barra de rolagem interna do grid */
+.upgrade-grid-container::-webkit-scrollbar {
+    width: 6px;
+}
+.upgrade-grid-container::-webkit-scrollbar-thumb {
+    background: #3498db;
+    border-radius: 4px;
+}
 
 
 
@@ -2098,90 +2391,97 @@ MÃO DE CARTAS
         font-size:0.8rem;
     }
 
-    /* BATALHA */
-    #screen-battle.active-screen{
-        overflow-y:auto;
+.battle-screen {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 8px 85px; /* O 85px protege contra o menu inferior, isso está ótimo */
+    box-sizing: border-box;
+    overflow-y: auto; /* <-- Mude de 'hidden' para 'auto'. Assim, se a tela do celular for muito curta, o jogador pode arrastar um pouquinho em vez de ver o layout quebrado */
+}
 
-        padding-bottom:120px;
-    }
+#screen-battle.active-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    overflow-y: auto; /* <-- Mude de 'hidden' para 'auto' aqui também */
+}
 
-    .battle-screen{
-        width:100%;
+.battle-entities {
+    width: 100%;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important; /* <-- CRUCIAL: Impede que um caia para baixo do outro */
+    justify-content: space-around; /* <-- Distribui melhor do que space-between */
+    align-items: center; /* <-- Alinha os dois ao centro verticalmente */
+    gap: 5px; /* Reduzi o gap para garantir que caibam */
+    margin-top: 10px;
+}
 
-        display:flex;
-        flex-direction:column;
+.entity {
+    width: 45%; /* <-- Reduzido de 48% para 45% para não estourar a tela */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-        align-items:center;
+/* IMAGEM */
 
-        gap:20px;
+.entity img,
+.sprite-container{
+    width:72px;
+    height:72px;
+}
 
-        padding:20px 0;
-    }
+/* HUD */
 
-    .battle-entities{
-        width:100%;
+.game-controls{
+    width:95%;
 
-        display:flex;
-        flex-direction:column;
+    display:flex;
 
-        align-items:center;
+    flex-direction:row; /* <<< AGORA FICA HORIZONTAL */
 
-        gap:25px;
+    justify-content:space-between;
 
-        margin-top:0;
-    }
+    align-items:center;
 
-    .entity{
-        margin-top:0;
+    gap:10px;
 
-        display:flex;
-        flex-direction:column;
+    padding:10px 14px;
 
-        align-items:center;
-    }
+    border-radius:18px;
 
-    .entity img{
-        width:90px;
-        height:90px;
+    margin:10px 0;
 
-        object-fit:cover;
-    }
-
-    /* HUD */
-    .game-controls{
-        width:95%;
-
-        display:flex;
-        flex-direction:column;
-
-        align-items:center;
-
-        gap:12px;
-
-        padding:15px;
-
-        border-radius:20px;
-    }
+    flex-shrink:0;
+}
 /* CARTAS */
 .hand {
     width: 100%;
     display: flex;
-    flex-direction: row;   /* Garante o alinhamento horizontal */
-    justify-content: center;
-    flex-wrap: nowrap;     /* Impede as cartas de pularem para a linha de baixo */
-    gap: 8px;
-    padding: 10px;
-    box-sizing: border-box; /* Evita que o padding estoure o tamanho da tela */
-    
-    /* FORÇA A LARGURA: Mesmo que o pai tente centralizar e encolher este container, 
-       isso obriga ele a esticar de ponta a ponta da tela */
-    align-self: stretch; 
+    align-items: center;
+    gap: 12px; /* Espaçamento mais confortável */
+    overflow-x: auto; /* Permite rolar horizontalmente */
+    overflow-y: hidden;
+    padding: 10px 5px; /* Um padding extra para a sombra ou brilho das cartas não cortar */
+    box-sizing: border-box;
+    flex-shrink: 0; /* <-- Impede que o container das cartas seja "esmagado" pelos itens de cima */
+    -webkit-overflow-scrolling: touch; /* Scroll suave no iOS */
 }
+/* ESCONDE SCROLL */
 
-.card {
-    width: 72px;
-    height: 105px;
-    flex-shrink: 0; /* Impede que as cartas fiquem "esmagadas" se a tela for pequena */
+.hand::-webkit-scrollbar{
+    display:none;
+}
+.card{
+    width:68px;
+    height:100px;
+
+    flex-shrink:0;
 }
     .card-image{
         width:100%;
@@ -2190,15 +2490,50 @@ MÃO DE CARTAS
 
     /* MODAL */
     .modal-content{
-        width:95%;
-        max-width:95%;
+    position:relative;
 
-        left:50%;
-        top:50%;
+    width:92%;
+    max-width:520px;
 
-        transform:translate(-50%, -50%);
+    max-height:90vh;
 
-        padding:20px;
-    }
+    overflow-y:auto;
 
+    margin:auto;
+
+    padding:22px;
+
+    border-radius:20px;
+
+    background:#141820;
+
+    border:2px solid #4a90e2;
+
+    box-sizing:border-box;
+
+    left:auto;
+    top:auto;
+    transform:none;
+}
+.modal-overlay{
+    padding:20px;
+
+    box-sizing:border-box;
+
+    overflow-y:auto;
+
+    align-items:flex-start;
+}
+
+}
+.stats{
+    font-size:1rem;
+    letter-spacing:1px;
+}
+.btn-turn{
+    padding:10px 18px;
+
+    font-size:0.85rem;
+
+    white-space:nowrap;
 }
