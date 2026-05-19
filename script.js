@@ -3,46 +3,23 @@
 // ==========================================
 let currentStage = 0;
 let gold = 0; 
+let shopUnlocked = false;
+
+
 
 const enemiesList = [
+   //{ name: "Feiticeira", hp: 200, maxHp: 200, color: "#8e44ad", img: "feiticeira.png" },
     { name: "Globin", hp: 45, maxHp: 45, color: "#27ae60", img: "globin.png" },
     { name: "Golem", hp: 90, maxHp: 90, color: "#e67e22", img: "golem.png" },
     { name: "Cavaleiro Sombrio", hp: 200, maxHp: 200, color: "#2c3e50", img: "cavaleiro.png" },
+    { name: "Líder dos Ladrões", hp: 160, maxHp: 160, color: "#f39c12", img: "liderladrao.png" }, // NOVO INIMIGO
     { name: "Cientista", hp: 270, maxHp: 270, color: "#9b59b6", img: "cientista.png" },
     { name: "Dragão do Prazo Final", hp: 300, maxHp: 300, color: "#c0392b", img: "dragao.png" }
 ];
+// ... Role um pouco para baixo até a área do --- SISTEMA DE LACAIO E ALVOS --- e adicione:
+let realCloneIndex = 1; // Guarda qual é o clone real (1, 2 ou 3)
+let thornsActive = false; // Flag da Magia de Espinhos
 
-// Lista de sugestões temáticas
-const habitSuggestions = [
-    "Treinar 30min na Academia",
-    "Estudar JavaScript por 1 Hora",
-    "Beber 2L de Água",
-    "Comer uma Fruta no Lanche",
-    "Meditar por 10 Minutos",
-    "Ler 5 Páginas de um Livro",
-    "Organizar a Mesa de Trabalho",
-    "Praticar Alongamento",
-    "Revisar Matéria do ENEM",
-    "Caminhada de 20 Minutos"
-];
-
-function toggleSuggestions() {
-    const box = document.getElementById('suggestionBox');
-    box.classList.toggle('hidden');
-    
-    // Limpa a box e adiciona as sugestões como botões
-    box.innerHTML = ''; 
-    habitSuggestions.forEach(sugestao => {
-        const btn = document.createElement('button');
-        btn.innerText = sugestao;
-        btn.className = 'suggestion-item-btn';
-        btn.onclick = () => {
-            document.getElementById('habitInput').value = sugestao;
-            box.classList.add('hidden'); // Fecha o menu após escolher
-        };
-        box.appendChild(btn);
-    });
-}
 
 // Controle de Tempo e Histórico
 const weekDays = ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"];
@@ -172,10 +149,18 @@ let player = {
 let overloadedNextTurn = false;
 let lastPlayedCard = null;
 
-let enemy = { ...enemiesList[0], nextAction: null, bleedTurns: 0, stunned: false, enemyShield: 0, hasSummoned: false };
-
+let enemy = {
+    ...enemiesList[currentStage],
+    nextAction: null,
+    bleedTurns: 0,
+    stunned: false,
+    enemyShield: 0,
+    hasSummoned: false,
+    weakened: false
+};
 // --- SISTEMA DE LACAIO E ALVOS ---
 let minion = null;
+let minion2 = null;
 let currentTarget = "enemy"; 
 
 let selectedIcon = "🏃";
@@ -214,7 +199,63 @@ let availableRewards = [
     // --- NOVAS CARTAS ADICIONADAS ---
     { name: "Ataque Final", type: "ataque_final", cost: 0, power: 30, img: "ataquefinal.png", colorClass: "card-ataque" },
     { name: "descarte ataque", type: "descarte_atk", cost: 2, power: 50, img: "descarte.png", colorClass: "card-espada" },
-    { name: "Golpe Vampírico", type: "vampiric_atk", cost: 2, power: 25, img: "vampirico.png", colorClass: "card-magia" }
+    { name: "Golpe Vampírico", type: "vampiric_atk", cost: 2, power: 25, img: "vampirico.png", colorClass: "card-magia" },
+    // =====================================
+// NOVAS CARTAS
+// =====================================
+
+{ name: "Corte Duplo", type: "multi_atk", hits: 2, cost: 2, power: 14, img: "corteduplo.png", colorClass: "card-ataque" },
+
+// RUPTURA
+{
+    name: "Ruptura",
+    type: "ruptura",
+    cost: 1,
+    power: 18,
+    img: "ruptura.png",
+    colorClass: "card-ataque"
+},
+
+// TEMPESTADE ARCANA
+{
+    name: "Tempestade Arcana",
+    type: "arcane_storm",
+    cost: 3,
+    power: 23,
+    img: "tempestadearcana.png",
+    colorClass: "card-magia"
+},
+
+// MALDIÇÃO
+{
+    name: "Maldição",
+    type: "curse",
+    cost: 1,
+    power: 0,
+    img: "maldicao.png",
+    colorClass: "card-magia"
+},
+
+// GAMBITO
+{
+    name: "Gambito",
+    type: "gambit",
+    cost: 0,
+    power: 0,
+    img: "gambito.png",
+    colorClass: "card-raio"
+},
+
+// ECLIPSE
+{
+    name: "Eclipse",
+    type: "eclipse",
+    cost: 4,
+    power: 100,
+    selfDamage: 5,
+    img: "eclipse.png",
+    colorClass: "card-magia"
+},
 ];
 const masterDeck = [
     { name: "Golpe", type: "atk", cost: 1, power: 15, img: "golpe.png", colorClass: "card-ataque" },
@@ -265,22 +306,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarButtons = document.querySelectorAll(".sidebar-btn");
     const screens = document.querySelectorAll(".screen");
 
-// =====================================
-// SISTEMA DE NAVEGAÇÃO UNIFICADO
-// =====================================
 
-
-            sidebarButtons.forEach(btn => {
-                btn.classList.remove("active");
-            });
-
-            button.classList.add("active");
-
-            screens.forEach(screen => {
-                screen.classList.remove("active-screen");
-            });
 
             const screenName = button.dataset.screen;
+            // BLOQUEIO DA LOJA
+if (screenName === "shop" && !shopUnlocked) {
+    log("🔒 Derrote o Cavaleiro Sombrio ou o Cientista para liberar a Loja!");
+    return;
+}
 
             const targetScreen = document.getElementById(
                 `screen-${screenName}`
@@ -289,10 +322,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if(targetScreen) {
                 targetScreen.classList.add("active-screen");
                 
-                if(target === "cards"){
-                    renderCardsScreen();
+if(screenName === "cards"){
+    renderCardsScreen();
 }
 
+if(screenName === "deckview"){
+    renderDeckView();
+}
                 // Atualiza gráfico quando abrir histórico
 if(screenName === "history") {
 
@@ -365,6 +401,18 @@ function startBattle() {
     overloadedNextTurn = false;
     lastPlayedCard = null;
     log("A batalha começou!");
+    
+    // --- NOVO: SE FOR O LÍDER DOS LADRÕES, A GANGUE JÁ VEM JUNTO CORRENDO ---
+    if (enemy.name.includes("Líder dos Ladrões")) {
+        minion = { name: "Ladrão Furtivo", hp: 70, maxHp: 70, img: "ladraof.png", nextAction: null, bleedTurns: 0, stunned: false, enemyShield: 0 };
+        minion2 = { name: "Ladrão Bruto", hp: 90, maxHp: 90, img: "ladraob.png", nextAction: null, bleedTurns: 0, stunned: false, enemyShield: 0 };
+        log(`💰 O Líder dos Ladrões emboscou você junto com sua Gangue!`);
+    } else {
+        // Garante que eles comecem vazios em outros estágios
+        minion = null;
+        minion2 = null;
+    }
+
     const btnStart = document.getElementById('btnStartBattle');
     if(btnStart) btnStart.classList.add('hidden');
     shuffleDeck();
@@ -372,6 +420,83 @@ function startBattle() {
     prepareEnemyAction();
     if (player.energy === 0) refillEnergyFromBank();
     updateUI();
+}
+// ==========================================
+// --- LÓGICA DE PRÉ-BATALHA E UPGRADE ---
+// ==========================================
+function tryStartBattle() {
+    // Estágio 2 = Cavaleiro Sombrio | Estágio 3 = Cientista
+    if (currentStage === 2 || currentStage === 4) {
+        openUpgradeScreen();
+    } else {
+        shopUnlocked = false; // Garante que a loja tranque em batalhas comuns
+        startBattle();
+    }
+}
+
+function openUpgradeScreen() {
+    const screen = document.getElementById('upgradeScreen');
+    const container = document.getElementById('upgradeCardDisplay');
+    
+    screen.classList.remove('hidden');
+    container.innerHTML = '';
+    
+    masterDeck.forEach((card, index) => {
+        // Criamos o wrapper principal do card
+        const wrapper = document.createElement('div');
+        wrapper.className = 'upgrade-card-wrapper';
+        
+        if (card.isUpgraded) {
+            wrapper.classList.add('maxed');
+        } else {
+            wrapper.onclick = () => selectUpgrade(index);
+        }
+        
+        // Buscamos o texto explicativo do que vai mudar
+        const textoPrevia = obterTextoPreviaUpgrade(card);
+        
+        // Injetamos a estrutura montada de forma limpa e scannável
+        wrapper.innerHTML = `
+            <div class="card ${card.colorClass}" style="transform: scale(0.95); margin: 0; pointer-events: none;">
+                <div class="card-cost">${card.cost}</div>
+                <img src="${card.img}" alt="${card.name}">
+                <div style="position: absolute; bottom: 5px; width: 100%; text-align: center; color: white; font-size: 11px; font-weight: bold; text-shadow: 1px 1px 2px black;">${card.name}</div>
+            </div>
+            
+            <div class="upgrade-preview-box">
+                <div style="color: ${card.isUpgraded ? '#e74c3c' : '#f1c40f'}; font-weight: bold; margin-bottom: 4px; font-size: 10px; text-transform: uppercase;">
+                    ${card.isUpgraded ? 'Nível Máximo' : '✨ Evolução'}
+                </div>
+                <div style="color: #bdc3c7; min-height: 32px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    ${textoPrevia}
+                </div>
+            </div>
+        `;
+        
+        container.appendChild(wrapper);
+    });
+}
+function selectUpgrade(index) {
+    const card = masterDeck[index];
+    
+    // Chama a nossa nova função de upgrade
+    const sucesso = aplicarEfeitoDeUpgrade(card);
+    
+    if (!sucesso) {
+        alert("Escolha outra carta, esta já está no máximo!");
+        return; // Impede que a tela feche se a carta já estiver melhorada
+    }
+    
+    // Atualiza a tela pra dar aquele feedback visual
+    log(`✨ PERFEIÇÃO! Você aprimorou: ${card.name}!`);
+    alert(`Evolução concluída! Você aprimorou: ${card.name}!`);
+    
+    // Fecha a tela de upgrade
+    document.getElementById('upgradeScreen').classList.add('hidden');
+    
+    // Tranca a loja e inicia a batalha contra o Boss
+    shopUnlocked = false; 
+    startBattle();
 }
 
 function refillEnergyFromBank() {
@@ -406,11 +531,7 @@ function completeHabit(id) {
     let bonus = Math.floor(h.streak / 3);
     let totalGanhado = Math.min(h.recompensa + bonus, 8);
     energyBank += totalGanhado;
-
-    // ATUALIZA O HISTÓRICO:
-    if(habitHistoryData[currentDayIndex] !== undefined) {
-        habitHistoryData[currentDayIndex]++; 
-    }
+    
     
     showEnergyGain(totalGanhado);
     log(`✔ ${h.nome} concluído! +${totalGanhado}⚡`);
@@ -419,7 +540,6 @@ function completeHabit(id) {
     updateUI();
     updateChart(); // Chama a atualização do gráfico
 }
-
 
 // --- SISTEMA DE PARRY E MINIGAMES ---
 function startSkillCheck() {
@@ -577,48 +697,53 @@ function shuffleDeck() {
     }
 }
 
-function drawHand() {
-    // Cartas iniciais que PODEM repetir na mão
+function drawHand(amount = 5) {
+
     const basicCards = ["Golpe", "Escudo"];
 
-    while (currentHand.length < 6) {
-        if (drawPile.length === 0) shuffleDeck();
-        
-        // Olhamos a primeira carta do baralho sem tirar ela ainda
-        const nextCard = drawPile[0]; 
+    for(let x = 0; x < amount; x++) {
 
-        // Verificamos se já existe uma carta com esse mesmo nome na mão
-        const alreadyInHand = currentHand.some(c => c.name === nextCard.name);
+        if(currentHand.length >= 6) break;
 
-        // Se for uma carta especial (Loot) e já estiver na mão, mandamos para o fim da fila
-        if (!basicCards.includes(nextCard.name) && alreadyInHand) {
-            // Move a carta para o final do deck para tentar pegar outra
-            drawPile.push(drawPile.shift()); 
-            
-            // Proteção: se o deck inteiro for de cartas repetidas, paramos para não travar o loop
-            const allRepeated = drawPile.every(c => currentHand.some(h => h.name === c.name));
-            if (allRepeated) break;
-            
-            continue; 
+        if(drawPile.length === 0) {
+            shuffleDeck();
         }
 
-        // Se passar nas regras, puxa a carta para a mão
+        const nextCard = drawPile[0];
+
+        if(!nextCard) break;
+
+        const alreadyInHand =
+            currentHand.some(c => c.name === nextCard.name);
+
+        if(
+            !basicCards.includes(nextCard.name)
+            && alreadyInHand
+        ) {
+
+            drawPile.push(drawPile.shift());
+
+            continue;
+        }
+
         currentHand.push(drawPile.shift());
     }
+
+    // 🔥 FORÇA RENDER
+    updateUI();
 }
 
 
 function setTarget(target) {
     if (!minion && target === 'minion') return;
+    if (!minion2 && target === 'minion2') return;
     currentTarget = target;
     updateUI();
-    log(`🎯 Mirando no ${target === 'enemy' ? enemy.name : minion.name}!`);
+    log(`🎯 Mirando no ${target === 'enemy' ? enemy.name : (target === 'minion' ? minion.name : minion2.name)}!`);
 }
 function playCard(index) {
     if (!inBattle || skillCheckActive || !document.getElementById('minigameOverlay').classList.contains('hidden')) return;
-    
-    // Mudamos para 'let' para podermos atualizar o índice caso a carta de descarte altere o tamanho da mão
-    let cardIndex = index;
+    const cardIndex = index;
     const card = currentHand[cardIndex];
 
     if (!card) return;
@@ -626,29 +751,60 @@ function playCard(index) {
     if (player.energy >= card.cost) {
         player.energy -= card.cost;
         let finalPower = (card.power || 0) + player.dmgBuff;
-        let targetEnt = (currentTarget === 'minion' && minion && minion.hp > 0) ? minion : enemy;
+        
+        // Define quem vai tomar o dano baseado no alvo atual!
+        let targetEnt = enemy;
+        let targetType = 'enemy';
+        if (currentTarget === 'minion' && minion && minion.hp > 0) { targetEnt = minion; targetType = 'minion'; }
+        if (currentTarget === 'minion2' && minion2 && minion2.hp > 0) { targetEnt = minion2; targetType = 'minion2'; }
+
+        // --- FUNÇÃO AUXILIAR INTELIGENTE PARA FILTRAR O DANOS DOS CLONES/FEITICEIRA ---
+        function aplicarDanoComFiltro(entidade, tipoAlvo, dano, nomeAtaque) {
+            if (enemy.name.includes("Feiticeira")) {
+                let realTarget = enemy.realIdentity || "enemy"; 
+                
+                if (tipoAlvo === realTarget) {
+                    // Acertou a real! O Boss toma o dano mitigado pelo escudo global do Boss
+                    let dmgToHp = Math.max(0, dano - (enemy.enemyShield || 0));
+                    enemy.enemyShield = Math.max(0, (enemy.enemyShield || 0) - dano);
+                    enemy.hp -= dmgToHp;
+                    log(`✨ Acertou! O ataque ${nomeAtaque} atingiu a Feiticeira Verdadeira causando ${dano} de impacto!`);
+                    shakeElement(document.getElementById('enemySprite'));
+                } else {
+                    // Errou e bateu em um clone falso!
+                    log(`💨 Ilusão! Seu ${nomeAtaque} atravessou o clone falso e dissipou na névoa.`);
+                    
+                    // Verifica se o clone falso estava com a Magia de Espinhos ativa
+                    if (entidade && entidade.espinhosAtivos) {
+                        let danoRefletido = Math.floor(dano * 0.5); // Devolve 50% do dano causado
+                        applyDamageToPlayer(danoRefletido);
+                        log(`💥 REBATEU! A magia de espinhos do clone te devolveu ${danoRefletido} de dano!`);
+                    }
+                }
+            } else {
+                // Comportamento normal para todos os outros monstros do jogo
+                let dmgToHp = Math.max(0, dano - (entidade.enemyShield || 0));
+                entidade.enemyShield = Math.max(0, (entidade.enemyShield || 0) - dano);
+                entidade.hp -= dmgToHp;
+                shakeElement(document.getElementById('enemySprite'));
+                log(`Usou ${nomeAtaque} em ${entidade.name}! Causou ${dano} de impacto.`);
+            }
+        }
 
         switch(card.type) {
             case "retaliation":
                 let baseDmg = player.tookDamageThisTurn ? (card.power * 2) : card.power;
-                let totalRetalDmg = baseDmg + player.dmgBuff;
-                let hpDmg = Math.max(0, totalRetalDmg - (targetEnt.enemyShield || 0));
-                targetEnt.enemyShield = Math.max(0, (targetEnt.enemyShield || 0) - totalRetalDmg);
-                targetEnt.hp -= hpDmg;
-                shakeElement(document.getElementById('enemySprite'));
-                log(`Determinação! Causou ${totalRetalDmg} de dano${player.tookDamageThisTurn ? " (RETALIAÇÃO!)" : ""}.`);
+                aplicarDanoComFiltro(targetEnt, targetType, baseDmg + player.dmgBuff, card.name || "Determinação");
                 player.dmgBuff = 0;
                 break;
 
             case "atk": 
             case "pierce": 
             case "magia":
-                let damageToHp = Math.max(0, finalPower - (targetEnt.enemyShield || 0));
-                targetEnt.enemyShield = Math.max(0, (targetEnt.enemyShield || 0) - finalPower);
-                targetEnt.hp -= damageToHp;
-                shakeElement(document.getElementById('enemySprite'));
-                log(`Usou ${card.name} em ${targetEnt.name}! Causou ${finalPower} de impacto.`);
-                if (card.effect === "bleed") { targetEnt.bleedTurns = 3; log("Sangramento!"); }
+                aplicarDanoComFiltro(targetEnt, targetType, finalPower, card.name);
+                if (card.effect === "bleed" && (!enemy.name.includes("Feiticeira") || targetType === (enemy.realIdentity || "enemy"))) { 
+                    targetEnt.bleedTurns = 3; log("Sangramento aplicado!"); 
+                }
                 player.dmgBuff = 0;
                 break;
 
@@ -684,51 +840,89 @@ function playCard(index) {
             case "time_stop":
                 enemy.stunned = true; 
                 if(minion) minion.stunned = true;
+                if(minion2) minion2.stunned = true;
                 player.energy += 1;
                 log("O tempo parou!");
                 break;
 
             case "execute":
-                let damageDealt = card.power + player.dmgBuff;
-                targetEnt.hp -= damageDealt;
-                log(`Boss Killer causou ${damageDealt} de dano!`);
-
-                 if (targetEnt.hp > 0 && targetEnt.hp < 60) {
-                    targetEnt.hp = 0;
-                    log(`🎯 LIMIAR ATINGIDO! O inimigo tinha menos de 60 HP e foi executado!`);
-                } else if (targetEnt.hp <= 0) {
-                    log(`O golpe foi fatal!`);
+                if (enemy.name.includes("Feiticeira") && targetType !== (enemy.realIdentity || "enemy")) {
+                    log("🚫 Execução falhou: Você tentou executar uma ilusão da Feiticeira!");
                 } else {
-                    log(`O alvo resistiu à execução.`);
+                    let execDmg = card.power + player.dmgBuff;
+                    targetEnt.hp -= execDmg;
+                    log(`Boss Killer causou ${execDmg} de dano!`);
+                    if (targetEnt.hp > 0 && targetEnt.hp < 60) {
+                        targetEnt.hp = 0;
+                        log(`🎯 LIMIAR ATINGIDO! O inimigo tinha menos de 60 HP e foi executado!`);
+                    } else if (targetEnt.hp <= 0) {
+                        log(`O golpe foi fatal!`);
+                    } else {
+                        log(`O alvo resistiu à execução.`);
+                    }
                 }
-
                 player.dmgBuff = 0;
                 shakeElement(document.getElementById('enemySprite'));
                 break;
 
             case "dark_atk":
-                let darkDmg = (card.power + player.dmgBuff);
-                targetEnt.hp -= darkDmg;
+                aplicarDanoComFiltro(targetEnt, targetType, finalPower, card.name || "Ataque Sombrio");
+                // Só aplica o recuo se não bater em ilusões vazias sem espinhos
                 applyDamageToPlayer(card.selfDamage);
-                log(`Ataque Sombrio no ${targetEnt.name}!`);
                 player.dmgBuff = 0;
                 break;
 
+            case "multi_atk":
+                for(let i = 0; i < card.hits; i++) {
+                    aplicarDanoComFiltro(targetEnt, targetType, card.power + player.dmgBuff, `${card.name} (Hit ${i+1})`);
+                }
+                player.dmgBuff = 0;
+                break;
+
+            case "ruptura":
+                if (enemy.name.includes("Feiticeira") && targetType !== (enemy.realIdentity || "enemy")) {
+                    log(`💥 Ruptura atingiu um clone falso! Nenhuma defesa foi destruída.`);
+                } else {
+                    targetEnt.enemyShield = 0;
+                    targetEnt.hp -= card.power;
+                    log(`💥 Ruptura destruiu toda a defesa inimiga! Causou ${card.power} na vida.`);
+                }
+                shakeElement(document.getElementById('enemySprite'));
+                break;
+
+            case "arcane_storm":
+                for(let i = 0; i < 3; i++) {
+                    aplicarDanoComFiltro(targetEnt, targetType, card.power, `Tempestade Arcana (Raio ${i+1})`);
+                }
+                break;
+
+            case "curse":
+                enemy.weakened = true;
+                log(`☠️ O inimigo foi amaldiçoado!`);
+                break;
+
+            case "gambit":
+                player.hp -= 10;
+                for(let i = 0; i < 2; i++) {
+                    if(drawPile.length === 0) shuffleDeck();
+                    currentHand.push(drawPile.shift());
+                }
+                log(`🎲 Gambito: +2 cartas, -10 HP.`);
+                break;
+
+            case "eclipse":
+                aplicarDanoComFiltro(targetEnt, targetType, card.power, "Eclipse");
+                player.hp -= card.selfDamage;
+                break;
+
             case "ataque_final":
-                let hasOtherAttacks = currentHand.some((c, i) => i !== cardIndex && ["atk", "pierce", "magia", "retaliation", "execute", "dark_atk", "ataque_calculado", "descarte_atk", "vampiric_atk"].includes(c.type));
-                
+                let hasOtherAttacks = currentHand.some((c, i) => i !== cardIndex && ["atk", "pierce", "magia", "retaliation", "execute", "dark_atk", "ataque_calculado", "descarte_atk", "vampiric_atk", "multi_atk", "arcane_storm", "eclipse"].includes(c.type));
                 if (hasOtherAttacks) {
                     log(`${card.name} falhou: Você ainda tem outras cartas de ataque na mão!`);
                     player.energy += card.cost; 
                     return; 
                 }
-                
-                let finalStrikeDmg = card.power + player.dmgBuff;
-                let finalStrikeHpDmg = Math.max(0, finalStrikeDmg - (targetEnt.enemyShield || 0));
-                targetEnt.enemyShield = Math.max(0, (targetEnt.enemyShield || 0) - finalStrikeDmg);
-                targetEnt.hp -= finalStrikeHpDmg;
-                shakeElement(document.getElementById('enemySprite'));
-                log(`Ataque Final fulminante! Causou ${finalStrikeDmg} de dano.`);
+                aplicarDanoComFiltro(targetEnt, targetType, finalPower, "Ataque Final");
                 player.dmgBuff = 0;
                 break;
 
@@ -738,35 +932,26 @@ function playCard(index) {
                     player.energy += card.cost; 
                     return;
                 }
-                
                 let idxToDiscard = currentHand.findIndex((c, i) => i !== cardIndex);
                 let discardedCard = currentHand.splice(idxToDiscard, 1)[0];
+                if (idxToDiscard < cardIndex) cardIndex -= 1;
                 
-                // Se a carta descartada estava antes da carta jogada no array, o índice da carta jogada diminui em 1
-                if (idxToDiscard < cardIndex) {
-                    cardIndex -= 1;
-                }
-                
-                let discardStrikeDmg = card.power + player.dmgBuff;
-                let discardStrikeHpDmg = Math.max(0, discardStrikeDmg - (targetEnt.enemyShield || 0));
-                targetEnt.enemyShield = Math.max(0, (targetEnt.enemyShield || 0) - discardStrikeDmg);
-                targetEnt.hp -= discardStrikeHpDmg;
-                shakeElement(document.getElementById('enemySprite'));
-                log(`Sacrificou ${discardedCard.name}! O ataque brutal causou ${discardStrikeDmg} de dano.`);
+                aplicarDanoComFiltro(targetEnt, targetType, finalPower, "Ataque Brutal");
+                log(`Sacrificou ${discardedCard.name}!`);
                 player.dmgBuff = 0;
                 break;
 
             case "vampiric_atk":
-                let vampDmg = card.power + player.dmgBuff;
-                let hpVampDmg = Math.max(0, vampDmg - (targetEnt.enemyShield || 0));
-                targetEnt.enemyShield = Math.max(0, (targetEnt.enemyShield || 0) - vampDmg);
-                targetEnt.hp -= hpVampDmg;
-                
-                let healAmt = Math.floor(hpVampDmg * 0.5);
-                player.hp = Math.min(100, player.hp + healAmt);
-                
-                shakeElement(document.getElementById('enemySprite'));
-                log(`Golpe Vampírico! Causou ${vampDmg} de dano e sugou ${healAmt} de HP.`);
+                if (enemy.name.includes("Feiticeira") && targetType !== (enemy.realIdentity || "enemy")) {
+                    log(`💨 Golpe Vampírico errou a feiticeira real! Você não sugou vida.`);
+                    aplicarDanoComFiltro(targetEnt, targetType, finalPower, "Golpe Vampírico");
+                } else {
+                    let hpVampDmg = Math.max(0, finalPower - (targetEnt.enemyShield || 0));
+                    aplicarDanoComFiltro(targetEnt, targetType, finalPower, "Golpe Vampírico");
+                    let healAmt = Math.floor(hpVampDmg * 0.5);
+                    player.hp = Math.min(100, player.hp + healAmt);
+                    if(healAmt > 0) log(`🍷 Sugou ${healAmt} de HP.`);
+                }
                 player.dmgBuff = 0;
                 break;
 
@@ -788,17 +973,12 @@ function playCard(index) {
 
             case "ataque_calculado":
                 let cardsInHand = currentHand.length - 1; 
-                let calcDamage = card.power + (card.power * cardsInHand) + player.dmgBuff;;
-                let hpDamageCalc = Math.max(0, calcDamage - (targetEnt.enemyShield || 0));
-                targetEnt.enemyShield = Math.max(0, (targetEnt.enemyShield || 0) - calcDamage);
-                targetEnt.hp -= hpDamageCalc;
-                shakeElement(document.getElementById('enemySprite'));
-                log(`Ataque Calculado (${cardsInHand} cartas)! Causou ${calcDamage} de dano em ${targetEnt.name}.`);
+                let calcDamage = card.power + (card.power * cardsInHand) + player.dmgBuff;
+                aplicarDanoComFiltro(targetEnt, targetType, calcDamage, `Ataque Calculado (${cardsInHand} cartas)`);
                 player.dmgBuff = 0;
                 break;
         }
 
-        // --- PARTE FINAL RESTAURADA AQUI ---
         if (card.type !== "loop") {
             lastPlayedCard = card;
         }
@@ -806,12 +986,21 @@ function playCard(index) {
         currentHand.splice(cardIndex, 1);
         updateUI();
         
-        if (minion && minion.hp <= 0) {
-            log("O Cavaleiro Sombrio foi destruído!");
-            minion = null;
-            currentTarget = "enemy";
-            updateUI();
+        // Remove lacaios comuns mortos se NÃO for a fase da Feiticeira
+        if (!enemy.name.includes("Feiticeira")) {
+            if (minion && minion.hp <= 0) {
+                log(`${minion.name} foi derrotado!`);
+                if (currentTarget === 'minion') currentTarget = 'enemy';
+                minion = null;
+            }
+            if (minion2 && minion2.hp <= 0) {
+                log(`${minion2.name} foi derrotado!`);
+                if (currentTarget === 'minion2') currentTarget = 'enemy';
+                minion2 = null;
+            }
         }
+        
+        updateUI();
         checkGameOver();
     } else {
         log("Sem energia!");
@@ -824,6 +1013,8 @@ function endTurn() {
     // 1. Limpeza de escudos e aplicação de status negativos (Sangramento/Queimadura)
     enemy.enemyShield = 0;
     if (minion) minion.enemyShield = 0;
+    if (minion2) minion2.enemyShield = 0;
+    if (minion2 && minion2.bleedTurns > 0) { minion2.hp -= 10; minion2.bleedTurns--; }
     if (enemy.bleedTurns > 0) { enemy.hp -= 10; enemy.bleedTurns--; }
     if (minion && minion.bleedTurns > 0) { minion.hp -= 10; minion.bleedTurns--; }
     if (player.burnTurns > 0) { player.hp -= 8; player.burnTurns--; }
@@ -842,7 +1033,20 @@ function endTurn() {
             updateUI();
             executeMinionActionAndFinish();
             return;
+            // Cole isso junto com o código que invoca o Cavaleiro Sombrio:
+        if (enemy.nextAction.type === "summon_thieves") {
+            enemy.hasSummoned = true;
+            log(`💰 O Líder convocou a sua Gangue!`);
+            minion = { name: "Ladrão Furtivo", hp: 70, maxHp: 70, img: "ladrao.png", nextAction: null, bleedTurns: 0, stunned: false, enemyShield: 0 };
+            minion2 = { name: "Ladrão Bruto", hp: 90, maxHp: 90, img: "ladrao.png", nextAction: null, bleedTurns: 0, stunned: false, enemyShield: 0 };
+            prepareMinionAction();
+            updateUI();
+            executeMinionActionAndFinish();
+            return;
         }
+
+        }
+        
 
         // B) Minigame: Cavaleiro (Ataque Pesado)
         if (enemy.name.includes("Cavaleiro") && enemy.nextAction.type === "dmg_heavy") {
@@ -850,7 +1054,7 @@ function endTurn() {
             startSkillCheck();
             return; 
         } 
-
+        
         // C) Minigame: Cientista
         if (enemy.name.includes("Cientista") && (enemy.nextAction.type.startsWith("sci_") || enemy.nextAction.type === "dmg")) {
             log("🔬 REAÇÃO QUÍMICA!");
@@ -862,7 +1066,25 @@ function endTurn() {
         if (!enemy.stunned) {
             switch(enemy.nextAction.type) {
                 case "dmg":
-                    applyDamageToPlayer(enemy.nextAction.val);
+let dmg = enemy.nextAction.val;
+
+if(enemy.weakened){
+
+    dmg = Math.floor(dmg * 0.5);
+
+    log("☠️ A maldição reduziu o dano!");
+
+    enemy.weakened = false;
+    
+}
+            switch(enemy.nextAction.type) {
+                case "steal_gold":
+            let stolenBoss = Math.floor(Math.random() * 5) + 3; // Rouba de 3 a 7
+            if (gold >= stolenBoss) gold -= stolenBoss; else { stolenBoss = gold; gold = 0; }
+            if (stolenBoss > 0) log(`💸 ${enemy.name} atacou e roubou ${stolenBoss} moedas!`);
+            updateUI();
+            break;}
+applyDamageToPlayer(dmg);
                     log(`${enemy.name} atacou!`);
                     break;
                 case "shield":
@@ -909,29 +1131,63 @@ function endTurn() {
     }, 600);
 }
 
+
 function executeMinionActionAndFinish() {
+    // 1. Processa o Primeiro Lacaio (Furtivo / Cavaleiro do Dragão)
     if (minion && minion.hp > 0 && !minion.stunned) {
         setTimeout(() => {
-            switch(minion.nextAction.type) {
-                case "dmg":
-                    applyDamageToPlayer(minion.nextAction.val);
-                    log(`${minion.name} atacou!`);
-                    break;
-                case "shield_boss":
-                    enemy.enemyShield += minion.nextAction.val;
-                    log(`${minion.name} protegeu o Dragão!`);
-                    break;
-            }
-            finishEnemyTurn();
+            processSingleMinionAction(minion);
+            // Depois que o lacaio 1 agir, vai para o lacaio 2
+            checkMinion2();
         }, 500);
     } else {
-        finishEnemyTurn();
+        checkMinion2();
     }
+
+    // 2. Função interna para checar e rodar o Ladrão Bruto
+    function checkMinion2() {
+        if (minion2 && minion2.hp > 0 && !minion2.stunned) {
+            setTimeout(() => {
+                processSingleMinionAction(minion2);
+                // Depois que o lacaio 2 agir, finalmente encerra o turno
+                finishEnemyTurn();
+            }, 500);
+        } else {
+            finishEnemyTurn();
+        }
+    }
+}
+
+// 3. Nova função auxiliar para executar as ações de qualquer lacaio no jogo
+function processSingleMinionAction(m) {
+    if (!m || !m.nextAction) return;
+
+    switch(m.nextAction.type) {
+        case "dmg":
+            applyDamageToPlayer(m.nextAction.val);
+            log(`⚔️ ${m.name} atacou! Causou ${m.nextAction.val} de dano.`);
+            break;
+        case "shield_boss":
+            enemy.enemyShield += m.nextAction.val;
+            log(`🛡️ ${m.name} protegeu o Chefe! +${m.nextAction.val} de escudo para o líder.`);
+            break;
+        case "shield_self":
+            m.enemyShield = (m.enemyShield || 0) + m.nextAction.val;
+            log(`🛡️ ${m.name} defendeu-se e ganhou +${m.nextAction.val} de escudo.`);
+            break;
+        case "steal_gold":
+            let amt = Math.floor(Math.random() * 5) + 3; // Entre 3 e 7 moedas
+            gold = Math.max(0, gold - amt);
+            log(`💰 ${m.name} roubou ${amt} moedas de ouro da sua bolsa!`);
+            break;
+    }
+    updateUI();
 }
 
 function finishEnemyTurn() {
     enemy.stunned = false;
     if(minion) minion.stunned = false;
+    if(minion2) minion2.stunned = false;
     player.shield = 0; 
     player.tookDamageThisTurn = false;
     currentHand = [];
@@ -942,43 +1198,99 @@ function finishEnemyTurn() {
     checkGameOver();
 }
 function getCardDescription(card) {
+
     switch(card.type) {
-        case "atk": 
-        case "pierce": return `Causa ${card.power} de dano ao inimigo.`;
-        case "def": return `Ganha ${card.power} de escudo.`;
-        case "magia": return `Dano Mágico: ${card.power}.`;
-        case "energy": return `Ganha ${card.power} de energia e compra 2 cartas.`;
-        case "execute": return `Dano: ${card.power}. Executa instantaneamente se o HP for menor que 60.`;
-        case "dark_atk": return `Causa ${card.power} de dano, mas você sofre dano de volta.`;
-        case "retaliation": return `Dano: ${card.power}. O dano é DOBRADO se você sofreu dano neste turno.`;
-        case "time_stop": return `Atordoa os inimigos por 1 turno e ganha +1⚡.`;
-        case "loop": return `Retorna a última carta jogada para a sua mão.`;
-        case "sobrecarga": return `Ganha +3⚡ agora, mas limita a energia no próximo turno.`;
-        case "ataque_calculado": return `Dano base: ${card.power}. Aumenta com base nas cartas na sua mão.`;
-        case "recycle": return `Descarta sua mão atual e compra cartas novas.`;
-        default: return `Um efeito misterioso...`;
+
+        case "atk":
+            return `Causa ${card.power} de dano ao inimigo, e aplica sangramento.`;
+
+        case "pierce":
+            return `Ignora parte da defesa e causa ${card.power} de dano.`;
+
+        case "def":
+            return `Ganha ${card.power} de escudo.`;
+
+        case "magia":
+            return `Causa ${card.power} de dano.`;
+
+        case "energy":
+            return `Ganha ${card.power}⚡ e compra 2 cartas.`;
+
+        case "execute":
+            return `Causa ${card.power} de dano. Executa inimigos abaixo de 60 HP.`;
+
+        case "dark_atk":
+            return `Causa ${card.power} de dano, mas você recebe dano de volta.`;
+
+        case "retaliation":
+            return `Causa ${card.power} de dano. Dobra se você sofreu dano neste turno.`;
+
+        case "time_stop":
+            return `Atordoa os inimigos por 1 turno e ganha +1⚡.`;
+
+        case "loop":
+            return `Retorna a última carta usada para sua mão.`;
+
+        case "sobrecarga":
+            return `Ganha +3⚡ agora, mas terá menos energia no próximo turno.`;
+
+        case "ataque_calculado":
+            return `Dano base ${card.power}. Fica mais forte conforme sua mão aumenta.`;
+
+        case "recycle":
+            return `Descarta toda sua mão e compra novas cartas.`;
+
         case "ataque_final":
             return `Causa ${card.power} de dano. Só pode ser usada se não houver outros ataques na mão.`;
+
         case "descarte_atk":
-            return `Causa ${card.power} de dano brutal, mas sacrifica uma carta aleatória da sua mão.`;
+            return `Causa ${card.power} de dano e destrói uma carta aleatória da sua mão.`;
+
         case "vampiric_atk":
-            return `Causa ${card.power} de dano e cura seu HP em 50% do dano causado diretamente à vida do alvo.`;
+            return `Causa ${card.power} de dano e recupera 50% do dano causado.`;
+
+        // =========================
+        // NOVAS CARTAS
+        // =========================
+
+        case "multi_atk":
+            return `Ataca 2 vezes causando ${card.power} de dano por golpe.`;
+
+        case "ruptura":
+            return `Destrói toda a defesa inimiga e causa ${card.power} de dano.`;
+
+        case "arcane_storm":
+            return `Dispara 3 explosões mágicas de ${card.power} de dano.`;
+
+        case "curse":
+            return `Amaldiçoa o inimigo reduzindo seu próximo ataque.`;
+
+        case "gambit":
+            return `Compra 2 cartas, mas perde 10 HP.`;
+
+        case "eclipse":
+            return `Causa ${card.power} de dano massivo, mas você perde ${card.selfDamage} HP.`;
+
+        default:
+            return `Um efeito misterioso...`;
     }
 }
 // --- INTERFACE ---
 function updateUI() {
-    // =========================
+    // ==========================================
     // --- REFERÊNCIAS BASE ---
-    // =========================
+    // ==========================================
     const handDiv = document.getElementById('playerHand');
     const enemyName = document.getElementById('enemyNameDisplay');
     const intentText = document.getElementById('intentText');
 
-    const activeEnemy = (currentTarget === 'minion' && minion) ? minion : enemy;
+    // Define qual inimigo está selecionado para atualizar o painel principal superior
+    const activeEnemy = (currentTarget === 'minion' && minion) ? minion : 
+                        (currentTarget === 'minion2' && minion2) ? minion2 : enemy;
 
-    // =========================
-    // --- INIMIGO ---
-    // =========================
+    // ==========================================
+    // --- INIMIGO (PAINEL PRINCIPAL) ---
+    // ==========================================
     if (enemyName) enemyName.innerText = activeEnemy.name;
 
     if (DOM.enemySprite) DOM.enemySprite.src = activeEnemy.img || "dragao.png";
@@ -996,105 +1308,101 @@ function updateUI() {
         DOM.shieldEnemy.innerText = `🛡️ ${activeEnemy.enemyShield || 0}`;
     }
 
-    // =========================
+    // ==========================================
     // --- PLAYER ---
-    // =========================
+    // ==========================================
     if (DOM.playerHp) DOM.playerHp.style.width = Math.max(0, player.hp) + "%";
     if (DOM.playerHpText) DOM.playerHpText.innerText = `${Math.max(0, Math.floor(player.hp))} / 100`;
     if (DOM.energyStat) DOM.energyStat.innerText = player.energy;
     if (DOM.shieldPlayer) DOM.shieldPlayer.innerText = `🛡️ ${player.shield}`;
     if (DOM.energyBank) DOM.energyBank.innerText = `Reserva: ${energyBank}⚡`;
 
-    // =========================
+    // ==========================================
     // --- OURO ---
-    // =========================
+    // ==========================================
     const goldUI = document.getElementById('goldValue');
     const goldBtn = document.getElementById('btnGoldDisplay');
 
     if (goldUI) goldUI.innerText = gold;
     if (goldBtn) goldBtn.innerText = gold;
 
-    // =========================
+// ==========================================
     // --- INTENÇÃO DO INIMIGO ---
-    // =========================
+    // ==========================================
     let combinedIntent = enemy.nextAction
         ? `Boss: ${enemy.nextAction.text}`
         : "Aguardando...";
 
     if (minion && minion.hp > 0 && minion.nextAction) {
-        combinedIntent += ` | Lacaio: ${minion.nextAction.text}`;
+        combinedIntent += ` | ${minion.name}: ${minion.nextAction.text}`;
+    }
+
+    if (minion2 && minion2.hp > 0 && minion2.nextAction) {
+        combinedIntent += ` | ${minion2.name}: ${minion2.nextAction.text}`;
     }
 
     if (intentText) intentText.innerText = combinedIntent;
 
-    // =========================
+// =========================
     // --- SELETOR DE ALVO ---
     // =========================
     let targetUI = document.getElementById('targetSelectorContainer');
 
-    if (minion && minion.hp > 0) {
+    if ((minion && minion.hp > 0) || (minion2 && minion2.hp > 0)) {
         if (!targetUI) {
             targetUI = document.createElement('div');
             targetUI.id = 'targetSelectorContainer';
             targetUI.style.margin = '10px auto';
-
             handDiv.parentNode.insertBefore(targetUI, handDiv);
         }
-
         targetUI.style.display = 'block';
 
-        targetUI.innerHTML = `
-            <div style="display:flex; gap:15px; align-items:center; justify-content:center; background:#222; padding:8px 15px; border-radius:8px; border:1px solid #444;">
-                <button onclick="setTarget('enemy')" 
-                    style="background:${currentTarget === 'enemy' ? '#c0392b' : '#333'}; color:white; padding:8px 12px; border:none; border-radius:5px; cursor:pointer;">
-                    🎯 Boss
-                </button>
+        let htmlBotao = `<div style="display:flex; gap:15px; align-items:center; justify-content:center; background:#222; padding:8px 15px; border-radius:8px; border:1px solid #444;">`;
+        
+        // Botão Boss
+        htmlBotao += `<button onclick="setTarget('enemy')" style="background:${currentTarget === 'enemy' ? '#c0392b' : '#333'}; color:white; padding:8px 12px; border:none; border-radius:5px; cursor:pointer;">🎯 ${enemy.name}</button>`;
 
-                <div style="text-align:center;">
-                    <strong style="color:white;">${minion.name}</strong><br>
-                    <small style="color:#ff7675;">HP: ${Math.max(0, Math.floor(minion.hp))} / ${minion.maxHp}</small>
-                </div>
+        // Botão Lacaio 1 (Furtivo)
+        if (minion && minion.hp > 0) {
+            htmlBotao += `<button onclick="setTarget('minion')" style="background:${currentTarget === 'minion' ? '#2c3e50' : '#333'}; color:white; padding:8px 12px; border:none; border-radius:5px; cursor:pointer;">🎯 ${minion.name} (${Math.floor(minion.hp)}HP)</button>`;
+        }
+        
+        // Botão Lacaio 2 (Bruto)
+        if (minion2 && minion2.hp > 0) {
+            htmlBotao += `<button onclick="setTarget('minion2')" style="background:${currentTarget === 'minion2' ? '#e67e22' : '#333'}; color:white; padding:8px 12px; border:none; border-radius:5px; cursor:pointer;">🎯 ${minion2.name} (${Math.floor(minion2.hp)}HP)</button>`;
+        }
 
-                <button onclick="setTarget('minion')" 
-                    style="background:${currentTarget === 'minion' ? '#2c3e50' : '#333'}; color:white; padding:8px 12px; border:none; border-radius:5px; cursor:pointer;">
-                    🎯 Lacaio
-                </button>
-            </div>
-        `;
+        htmlBotao += `</div>`;
+        targetUI.innerHTML = htmlBotao;
     } else if (targetUI) {
         targetUI.style.display = 'none';
     }
 
-    // =========================
+    // ==========================================
     // --- CARTAS NA MÃO ---
-    // =========================
+    // ==========================================
     if (handDiv) {
         handDiv.innerHTML = '';
 
-currentHand.forEach((card, index) => {
-    const cardEl = document.createElement('div');
-    cardEl.className = `card ${card.colorClass}`;
+        currentHand.forEach((card, index) => {
+            const cardEl = document.createElement('div');
+            cardEl.className = `card ${card.colorClass}`;
 
-    // 🔥 VERIFICA ENERGIA
-    if (player.energy < card.cost) {
-        cardEl.classList.add('disabled');
-    } else {
-        cardEl.onclick = () => playCard(index);
-    }
+            if (player.energy < card.cost) {
+                cardEl.classList.add('disabled');
+            } else {
+                cardEl.onclick = () => playCard(index);
+            }
 
             cardEl.innerHTML = `
-    <div class="card-cost">${card.cost}</div>
-    <img src="${card.img}" alt="${card.name}">
-    
-    <div class="card-name">${card.name}</div>
-
-    <!-- 🔥 TOOLTIP -->
-    <div class="card-tooltip">
-        <b>${card.name}</b><br>
-        ${getCardDescription(card)}
-    </div>
-`;
-
+                <div class="card-cost">${card.cost}</div>
+                <img src="${card.img}" alt="${card.name}">
+                <div class="card-name">${card.name}</div>
+                <div class="card-tooltip">
+                    <b>${card.name}</b><br>
+                    ${getCardDescription(card)}
+                </div>
+            `;
             handDiv.appendChild(cardEl);
         });
     }
@@ -1137,6 +1445,13 @@ function prepareEnemyAction() {
             { text: "Hipótese Escrita 📝 (70 dano)", type: "sci_type", val: 70 },
             { text: "Lança-Chamas (40 dano)", type: "dmg", val: 50 }
         ];
+    }else if (enemy.name.includes("Líder dos Ladrões")) {
+        // Removido o summon_thieves! Ele agora ataca diretamente.
+        actions = [
+            { text: "Ataque Sujo (25 dano)", type: "dmg", val: 25 },
+            { text: "Assalto (Rouba moedas)", type: "steal_gold", val: 0 },
+            { text: "Barreira Ladina (20🛡️)", type: "shield", val: 20 }
+        ];
     } else if (enemy.name.includes("Cavaleiro")) {
         // Removido: Muralha (shield)
         actions = [
@@ -1149,18 +1464,28 @@ function prepareEnemyAction() {
             { text: "Barreira (25🛡️)", type: "shield", val: 25 }
         ];
     }
+    
     enemy.nextAction = actions[Math.floor(Math.random() * actions.length)];
     prepareMinionAction();
     updateUI();
 }
 
 function prepareMinionAction() {
-    if (!minion) return;
-    let mActions = [
-        { text: "Ataque (15 dano)", type: "dmg", val: 15 },
-        { text: "Proteção (15🛡️ Boss)", type: "shield_boss", val: 15 }
-    ];
-    minion.nextAction = mActions[Math.floor(Math.random() * mActions.length)];
+    if (enemy.name.includes("Líder dos Ladrões")) {
+        let thiefActions = [
+            { text: "Ataque Furtivo (12 dano)", type: "dmg", val: 12 },
+            { text: "Proteger Líder (15 🛡️)", type: "shield_boss", val: 15 },
+            { text: "Pivete (Rouba moedas)", type: "steal_gold", val: 0 }
+        ];
+        if (minion && minion.hp > 0) minion.nextAction = thiefActions[Math.floor(Math.random() * thiefActions.length)];
+        if (minion2 && minion2.hp > 0) minion2.nextAction = thiefActions[Math.floor(Math.random() * thiefActions.length)];
+    } else if (enemy.name.includes("Dragão")) {
+        let dragonActions = [
+            { text: "Golpe de Lança (12 dano)", type: "dmg", val: 12 },
+            { text: "Proteger Dragão (15 🛡️)", type: "shield_boss", val: 15 }
+        ];
+        if (minion && minion.hp > 0) minion.nextAction = dragonActions[Math.floor(Math.random() * dragonActions.length)];
+    }
 }
 
 function checkGameOver() {
@@ -1168,6 +1493,16 @@ function checkGameOver() {
         inBattle = false;
         const reward = Math.floor(Math.random() * 11) + 15; 
         gold += reward;
+        // DESBLOQUEIA A LOJA
+// --- NOVO CÓDIGO DE DESTRANCAR A LOJA AQUI ---
+        if (enemy.name.includes("Cavaleiro") || enemy.name.includes("Cientista")) {
+            shopUnlocked = true;
+            log("🛒 O caminho está seguro. A Loja do Viajante foi destrancada!");
+        } {
+    shopUnlocked = true;
+
+    log("🏪 A Loja foi desbloqueada!");
+}
         log(`Vitória! Você coletou 💰 ${reward} moedas.`);
         
         minion = null;
@@ -1368,6 +1703,7 @@ function completeHabit(id) {
 
     if(habitHistoryData[currentDayIndex] !== undefined) {
         habitHistoryData[currentDayIndex]++;
+        let missedHabitsHistory = [];
     }
     
     showEnergyGain(totalGanhado);
@@ -1376,6 +1712,10 @@ function completeHabit(id) {
     renderHabitsForToday();
     if(typeof updateUI === 'function') updateUI();
     updateChart();
+    // soma quantidade concluída
+    h.completedCount = (h.completedCount || 0) + 1;
+        // 🔥 FALTAVA ISSO
+    updateHistoryStats();
 }
 
 // ==========================================
@@ -1399,24 +1739,181 @@ function toggleDaysSelector() {
         selector.classList.toggle('hidden', tipo !== 'semanal');
     }
 }
+// ==========================================
+// HISTÓRICO DE HÁBITOS PERDIDOS
+// ==========================================
 
+let missedHabitsHistory = [];
 
 function nextDay() {
-    currentDayIndex = (currentDayIndex + 1) % 7;
-    
-    const dailyBonus = Math.min(3 + consecutiveDays, 15); 
-    energyBank += dailyBonus;
-    consecutiveDays++; 
 
-    const display = document.getElementById('currentDayDisplay');
-    if(display) display.innerText = `📅 ${weekDays[currentDayIndex]}`;
-    
-    showEnergyGain(dailyBonus); 
-    log(`🌅 Amanheceu em ${weekDays[currentDayIndex]}! +${dailyBonus}⚡ (Bônus Diário)`);
-    
-    renderHabitsForToday(); 
-    if(typeof updateUI === 'function') updateUI(); 
-    updateChart(); 
+    // =========================================
+    // VERIFICA HÁBITOS PERDIDOS
+    // =========================================
+
+    meusHabitos.forEach(h => {
+
+        const eraDiaDoHabito =
+
+            h.tipo === "diario" ||
+
+            (
+                h.tipo === "semanal" &&
+                h.dias.includes(currentDayIndex)
+            );
+
+        const naoFoiFeitoHoje =
+            h.lastDoneIndex !== currentDayIndex;
+
+        // 🔥 PERDEU O HÁBITO
+        if (eraDiaDoHabito && naoFoiFeitoHoje) {
+
+            // RESET DA STREAK
+            h.streak = 0;
+
+            // SALVA NO HISTÓRICO
+            missedHabitsHistory.push({
+
+                nome: h.nome,
+
+                dia: weekDays[currentDayIndex],
+
+                data: new Date().toLocaleDateString()
+
+            });
+
+            log(`❌ Hábito perdido: ${h.nome}`);
+            updateChart();
+            updateHistoryStats();
+        }
+    });
+
+    // =========================================
+    // AVANÇA O DIA
+    // =========================================
+
+    currentDayIndex =
+        (currentDayIndex + 1) % 7;
+
+    // =========================================
+    // RESETA O GRÁFICO TODA SEGUNDA
+    // =========================================
+
+    if (currentDayIndex === 0) {
+
+        habitHistoryData =
+            [0, 0, 0, 0, 0, 0, 0];
+
+        log("📊 Novo ciclo semanal iniciado!");
+    }
+
+    // =========================================
+    // BÔNUS DIÁRIO
+    // =========================================
+
+    const dailyBonus =
+        Math.min(3 + consecutiveDays, 15);
+
+    energyBank += dailyBonus;
+
+    consecutiveDays++;
+
+    // =========================================
+    // UI
+    // =========================================
+
+    const display =
+        document.getElementById('currentDayDisplay');
+
+    if (display) {
+
+        display.innerText =
+            `📅 ${weekDays[currentDayIndex]}`;
+    }
+
+    showEnergyGain(dailyBonus);
+
+    log(
+        `🌅 Amanheceu em ${weekDays[currentDayIndex]}! +${dailyBonus}⚡`
+    );
+
+    renderHabitsForToday();
+
+    if (typeof updateUI === 'function') {
+
+        updateUI();
+    }
+
+    updateChart();
+
+    // Atualiza histórico visual
+    if (typeof updateHistoryList === "function") {
+
+        updateHistoryList();
+    }
+}
+function updateHistoryList() {
+
+    const historyContainer =
+        document.getElementById("historyList");
+
+    if (!historyContainer) return;
+
+    historyContainer.innerHTML = "";
+
+    // Nenhum hábito perdido
+    if (missedHabitsHistory.length === 0) {
+
+        historyContainer.innerHTML = `
+
+            <div style="
+                color:white;
+                padding:10px;
+            ">
+                Nenhum hábito perdido 🎉
+            </div>
+
+        `;
+
+        return;
+    }
+
+    // Renderiza histórico
+    missedHabitsHistory
+        .slice()
+        .reverse()
+        .forEach(item => {
+
+            const div =
+                document.createElement("div");
+
+            div.className = "history-item";
+
+            div.innerHTML = `
+
+                <div style="
+                    background:#2c0b0e;
+                    border:1px solid #c0392b;
+                    border-radius:10px;
+                    padding:12px;
+                    margin-bottom:10px;
+                    color:white;
+                ">
+
+                    ❌ <b>${item.nome}</b><br>
+
+                    <small>
+                        Perdido em:
+                        ${item.dia}
+                        (${item.data})
+                    </small>
+
+                </div>
+
+            `;
+
+            historyContainer.appendChild(div);
+        });
 }
 
 // ==========================================
@@ -1475,8 +1972,8 @@ function addHabit() {
         streak: 0,
 
         lastDone: null,
-
-        lastDoneIndex: null
+        lastDoneIndex: null,
+        completedCount: 0
     };
 
     meusHabitos.push(novoHabito);
@@ -1529,17 +2026,22 @@ sidebarButtons.forEach(button => {
             targetScreen.classList.add("active-screen");
 
             // Atualiza histórico
-            if (target === "history") {
-                updateHistoryList();
+if (target === "history") {
 
-                setTimeout(() => {
-                    if (habitChart) {
-                        habitChart.destroy();
-                    }
+    updateHistoryList();
 
-                    initChart();
-                }, 50);
-            }
+    updateHistoryStats();
+
+    setTimeout(() => {
+
+        if (habitChart) {
+            habitChart.destroy();
+        }
+
+        initChart();
+
+    }, 50);
+}
 
             // Atualiza batalha
             if (target === "battle") {
@@ -1554,6 +2056,7 @@ sidebarButtons.forEach(button => {
     });
 
 });
+
 // Funções para controlar o Modal de Hábitos
 function abrirModalHabito() {
     document.getElementById('modalNovoHabito').classList.remove('hidden');
@@ -1696,11 +2199,151 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 // Exemplo de como a função deve atualizar o texto que vimos no print
 function addBetaEnergy() {
-    suaVariavelDeReserva += 10; // adiciona o valor
+    energyBank += 9999999;
+    updateUI(); // adiciona o valor
     
     // Procura o elemento da reserva (ajuste a classe/id para o seu caso)
     const displayReserva = document.querySelector(".reserva-energia"); 
     if (displayReserva) {
         displayReserva.innerHTML = `Reserva: ${suaVariavelDeReserva} ⚡`;
+    }
+}
+function updateHistoryStats() {
+
+    // 🔥 Melhor streak
+    const best = Math.max(
+        ...meusHabitos.map(h => h.streak || 0),
+        0
+    );
+
+    // ⚡ Energia total gerada
+    let totalEnergyGenerated = 0;
+
+    meusHabitos.forEach(h => {
+
+        // quantidade de vezes concluídas
+        if (h.completedCount) {
+
+            totalEnergyGenerated +=
+                h.completedCount * h.recompensa;
+        }
+
+    });
+
+    // ✅ Hábitos concluídos
+    const completed = meusHabitos.reduce((acc, h) => {
+
+        return acc + (h.completedCount || 0);
+
+    }, 0);
+
+    // Atualiza UI
+    document.getElementById("bestStreak").innerText = best;
+
+    document.getElementById("totalEnergy").innerText =
+        totalEnergyGenerated;
+
+    document.getElementById("completedHabits").innerText =
+        completed;
+
+    document.getElementById("consecutiveDaysDisplay").innerText =
+        consecutiveDays || 0;
+}
+function toggleDeckView(){
+
+    const modal = document.getElementById("deckModal");
+
+    modal.classList.toggle("hidden");
+
+    renderDeckView();
+}
+function updateEnergy(){
+
+    document.getElementById("energyStat").textContent =
+        player.energy;
+
+}
+function aplicarEfeitoDeUpgrade(card) {
+    // Se a carta já foi melhorada, não deixa melhorar de novo (opcional)
+    if (card.isUpgraded) {
+        console.log("Esta carta já está no nível máximo!");
+        return false; // Retorna falso para avisar que não rolou upgrade
+    }
+
+    // Marca que a carta foi melhorada
+    card.isUpgraded = true;
+    
+    // Adiciona um "+" no nome para o jogador ver que ela tá bolada
+    card.name = card.name + "+";
+
+    // Verifica qual é a carta e aplica o buff correspondente
+    switch (card.name.replace("+", "")) { // Tira o "+" temporariamente só pra checar o nome original
+        
+        case "Golpe":
+            card.cost = 0; // Custo zero!
+            // card.power += 5; // Se quisesse, poderia aumentar o dano também
+            break;
+
+        case "Escudo":
+            card.cost = 0; // Custo zero!
+            break;
+
+        case "Golpe Duplo":
+            // Supondo que você criou uma carta que tinha hits: 2
+            card.hits = 3; 
+            card.power += 2; // Dá um bônus de dano por hit também
+            break;
+
+        case "Bola de Fogo":
+            card.power += 0; // Muito mais dano
+            card.cost = 1;    // Fica mais barata
+            break;
+
+        case "Foco":
+            card.power += 1; // Agora dá 4 de energia em vez de 2
+            break;
+            case "Corte Duplo":
+            card.hits = 3;  // Adiciona o terceiro golpe aqui!
+            card.power += 1; // Opcional: dá um leve bônus de +1 de dano por corte
+            break;
+
+        // Se a carta não tiver um upgrade específico programado, a gente dá um buff padrão
+        default:
+            if (card.power > 0) card.power += 10; // +10 de status base
+            if (card.cost > 1) card.cost -= 1;    // Reduz o custo em 1
+            break;
+    }
+    
+    return true; // Retorna verdadeiro indicando que o upgrade foi um sucesso
+}
+function obterTextoPreviaUpgrade(card) {
+    // Se a carta já estiver upada, avisa
+    if (card.isUpgraded) {
+        return "<span style='color: #e74c3c;'>Já está no nível máximo!</span>";
+    }
+
+    // Retorna o texto baseado no nome original da carta
+    switch (card.name) {
+        case "Golpe":
+            return "<span style='color: #2ecc71;'>⚡ Custo: 1 ➔ 0</span><br><span style='color: #f1c40f;'>Fica gratuita!</span>";
+        
+        case "Escudo":
+            return "<span style='color: #2ecc71;'>⚡ Custo: 1 ➔ 0</span><br><span style='color: #f1c40f;'>Fica gratuita!</span>";
+        
+        case "Corte Duplo":
+            return "<span style='color: #2ecc71;'>⚔️ Golpes: 2 ➔ 3</span><br><span style='color: #2ecc71;'>💥 Dano: +1 por hit</span>";
+        
+        case "Bola de Fogo":
+            return "<span style='color: #2ecc71;'>💥 Dano: +20</span><br><span style='color: #2ecc71;'>⚡ Custo: 2 ➔ 1</span>";
+            
+        case "Foco":
+            return "<span style='color: #2ecc71;'>🔋 Energia: +2 adicionais</span>";
+        
+        default:
+            // Um texto padrão para qualquer outra carta que você criar
+            let mudanca = "";
+            if (card.power > 0) mudanca += `<span style='color: #2ecc71;'>💥 Status: +10</span><br>`;
+            if (card.cost > 0) mudanca += `<span style='color: #2ecc71;'>⚡ Custo: -1</span><br>`;
+            return mudanca || "<span style='color: #f1c40f;'>Melhoria de atributos gerais!</span>";
     }
 }
