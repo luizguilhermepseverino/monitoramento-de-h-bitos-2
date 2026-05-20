@@ -8,18 +8,19 @@ let shopUnlocked = false;
 
 
 const enemiesList = [
-   //{ name: "Feiticeira", hp: 200, maxHp: 200, color: "#8e44ad", img: "feiticeira.png" },
     { name: "Globin", hp: 45, maxHp: 45, color: "#27ae60", img: "globin.png" },
     { name: "Golem", hp: 90, maxHp: 90, color: "#e67e22", img: "golem.png" },
     { name: "Cavaleiro Sombrio", hp: 200, maxHp: 200, color: "#2c3e50", img: "cavaleiro.png" },
+    { name: "Feiticeira", hp: 120, maxHp: 200, color: "#8e44ad", img: "feiticeira.png" },
     { name: "Líder dos Ladrões", hp: 160, maxHp: 160, color: "#f39c12", img: "liderladrao.png" }, // NOVO INIMIGO
     { name: "Cientista", hp: 270, maxHp: 270, color: "#9b59b6", img: "cientista.png" },
     { name: "Dragão do Prazo Final", hp: 300, maxHp: 300, color: "#c0392b", img: "dragao.png" }
 ];
 // ... Role um pouco para baixo até a área do --- SISTEMA DE LACAIO E ALVOS --- e adicione:
-let realCloneIndex = 1; // Guarda qual é o clone real (1, 2 ou 3)
-let thornsActive = false; // Flag da Magia de Espinhos
-
+const witchState = {
+    realTarget: "enemy",
+    thornedClone: null
+};
 
 // Controle de Tempo e Histórico
 const weekDays = ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"];
@@ -386,6 +387,15 @@ function login() {
     player.name = nameInput;
     player.gender = genderInput;
 
+    // ALTERA O PERSONAGEM
+    const playerSprite = document.getElementById("playerSprite");
+
+    if (player.gender === "Masculino") {
+        playerSprite.src = "heroi_homem.png";
+    } else {
+        playerSprite.src = "heroi_mulher.png";
+    }
+
     document.getElementById("playerNameDisplay").innerText = player.name;
 
     document.getElementById("loginScreen").classList.add("hidden");
@@ -743,7 +753,7 @@ function setTarget(target) {
 }
 function playCard(index) {
     if (!inBattle || skillCheckActive || !document.getElementById('minigameOverlay').classList.contains('hidden')) return;
-    const cardIndex = index;
+    let cardIndex = index;
     const card = currentHand[cardIndex];
 
     if (!card) return;
@@ -759,38 +769,75 @@ function playCard(index) {
         if (currentTarget === 'minion2' && minion2 && minion2.hp > 0) { targetEnt = minion2; targetType = 'minion2'; }
 
         // --- FUNÇÃO AUXILIAR INTELIGENTE PARA FILTRAR O DANOS DOS CLONES/FEITICEIRA ---
-        function aplicarDanoComFiltro(entidade, tipoAlvo, dano, nomeAtaque) {
-            if (enemy.name.includes("Feiticeira")) {
-                let realTarget = enemy.realIdentity || "enemy"; 
-                
-                if (tipoAlvo === realTarget) {
-                    // Acertou a real! O Boss toma o dano mitigado pelo escudo global do Boss
-                    let dmgToHp = Math.max(0, dano - (enemy.enemyShield || 0));
-                    enemy.enemyShield = Math.max(0, (enemy.enemyShield || 0) - dano);
-                    enemy.hp -= dmgToHp;
-                    log(`✨ Acertou! O ataque ${nomeAtaque} atingiu a Feiticeira Verdadeira causando ${dano} de impacto!`);
-                    shakeElement(document.getElementById('enemySprite'));
-                } else {
-                    // Errou e bateu em um clone falso!
-                    log(`💨 Ilusão! Seu ${nomeAtaque} atravessou o clone falso e dissipou na névoa.`);
-                    
-                    // Verifica se o clone falso estava com a Magia de Espinhos ativa
-                    if (entidade && entidade.espinhosAtivos) {
-                        let danoRefletido = Math.floor(dano * 0.5); // Devolve 50% do dano causado
-                        applyDamageToPlayer(danoRefletido);
-                        log(`💥 REBATEU! A magia de espinhos do clone te devolveu ${danoRefletido} de dano!`);
-                    }
-                }
-            } else {
-                // Comportamento normal para todos os outros monstros do jogo
-                let dmgToHp = Math.max(0, dano - (entidade.enemyShield || 0));
-                entidade.enemyShield = Math.max(0, (entidade.enemyShield || 0) - dano);
-                entidade.hp -= dmgToHp;
-                shakeElement(document.getElementById('enemySprite'));
-                log(`Usou ${nomeAtaque} em ${entidade.name}! Causou ${dano} de impacto.`);
+      function aplicarDanoComFiltro(entidade, tipoAlvo, dano, nomeAtaque) {
+
+    // =====================================
+    // FEITICEIRA
+    // =====================================
+
+    if(enemy.name.includes("Feiticeira")) {
+
+        // ACERTOU A VERDADEIRA
+        if(tipoAlvo === witchRealTarget) {
+
+            let danoFinal =
+                Math.max(0, dano - enemy.enemyShield);
+
+            enemy.enemyShield =
+    Math.max(0, enemy.enemyShield - dano);
+
+// TODOS COMPARTILHAM O ESCUDO
+if(minion) minion.enemyShield = enemy.enemyShield;
+if(minion2) minion2.enemyShield = enemy.enemyShield;
+
+            enemy.hp -= danoFinal;
+
+            // TODOS COMPARTILHAM A MESMA VIDA
+            if(minion) minion.hp = enemy.hp;
+            if(minion2) minion2.hp = enemy.hp;
+
+            shakeElement(
+                document.getElementById('enemySprite')
+            );
+
+            log(`✨ ${nomeAtaque} acertou a VERDADEIRA causando ${danoFinal}!`);
+        }
+
+        // ACERTOU CLONE
+        else {
+
+            log(`💨 ${nomeAtaque} atravessou uma ilusão!`);
+
+            // ESPINHOS
+            if(tipoAlvo === thornedClone) {
+
+let refletido = dano;
+
+                applyDamageToPlayer(refletido);
+
+                log(`🌵 Os espinhos refletiram ${refletido} dano!`);
             }
         }
 
+        return;
+    }
+
+    // =====================================
+    // NORMAL
+    // =====================================
+
+    let danoFinal =
+        Math.max(0, dano - (entidade.enemyShield || 0));
+
+    entidade.enemyShield =
+        Math.max(0, (entidade.enemyShield || 0) - dano);
+
+    entidade.hp -= danoFinal;
+
+    shakeElement(document.getElementById('enemySprite'));
+
+    log(`${nomeAtaque} causou ${danoFinal} dano.`);
+}
         switch(card.type) {
             case "retaliation":
                 let baseDmg = player.tookDamageThisTurn ? (card.power * 2) : card.power;
@@ -800,13 +847,21 @@ function playCard(index) {
 
             case "atk": 
             case "pierce": 
-            case "magia":
                 aplicarDanoComFiltro(targetEnt, targetType, finalPower, card.name);
                 if (card.effect === "bleed" && (!enemy.name.includes("Feiticeira") || targetType === (enemy.realIdentity || "enemy"))) { 
                     targetEnt.bleedTurns = 3; log("Sangramento aplicado!"); 
                 }
                 player.dmgBuff = 0;
                 break;
+                case "magia":
+    targetEnt.hp -= finalPower;
+
+    shakeElement(document.getElementById('enemySprite'));
+
+    log(`✨ ${card.name} lançou magia em ${targetEnt.name} causando ${finalPower} dano mágico!`);
+
+    player.dmgBuff = 0;
+    break;
 
             case "def": 
                 player.shield += card.power; 
@@ -955,15 +1010,20 @@ function playCard(index) {
                 player.dmgBuff = 0;
                 break;
 
-            case "loop":
-                if (lastPlayedCard) {
-                    let copiedCard = { ...lastPlayedCard, id: Math.random().toString(36).substr(2, 9) };
-                    currentHand.push(copiedCard);
-                    log(`Loop! Retornou ${copiedCard.name} para a sua mão.`);
-                } else {
-                    log("Loop falhou: Nenhuma carta foi jogada ainda.");
-                }
-                break;
+case "loop":
+    if (lastPlayedCard && lastPlayedCard.type !== "loop") {
+        let copiedCard = {
+            ...lastPlayedCard,
+            id: Math.random().toString(36).substr(2, 9)
+        };
+
+        currentHand.push(copiedCard);
+
+        log(`Loop! Retornou ${copiedCard.name} para sua mão.`);
+    } else {
+        log("Loop falhou.");
+    }
+    break;
 
             case "sobrecarga":
                 player.energy += 3;
@@ -1008,12 +1068,23 @@ function playCard(index) {
 }
 
 function endTurn() {
-    if (!inBattle || skillCheckActive || !document.getElementById('minigameOverlay').classList.contains('hidden')) return; 
+
+    const minigameOverlay = document.getElementById('minigameOverlay');
+
+    if (
+        !inBattle ||
+        skillCheckActive ||
+        (minigameOverlay && !minigameOverlay.classList.contains('hidden'))
+    ) {
+        return;
+    }
+     
     
     // 1. Limpeza de escudos e aplicação de status negativos (Sangramento/Queimadura)
     enemy.enemyShield = 0;
     if (minion) minion.enemyShield = 0;
     if (minion2) minion2.enemyShield = 0;
+    
     if (minion2 && minion2.bleedTurns > 0) { minion2.hp -= 10; minion2.bleedTurns--; }
     if (enemy.bleedTurns > 0) { enemy.hp -= 10; enemy.bleedTurns--; }
     if (minion && minion.bleedTurns > 0) { minion.hp -= 10; minion.bleedTurns--; }
@@ -1024,7 +1095,7 @@ function endTurn() {
     setTimeout(() => {
         if (enemy.hp <= 0) { checkGameOver(); return; }
         
-        // A) Regra do Dragão (Convocar)
+        // A) Regras de Convocação (Invocação de Lacaios)
         if (enemy.nextAction.type === "summon_knight") {
             enemy.hasSummoned = true;
             log(`🐉 O Dragão convocou o Cavaleiro Sombrio!`);
@@ -1033,7 +1104,8 @@ function endTurn() {
             updateUI();
             executeMinionActionAndFinish();
             return;
-            // Cole isso junto com o código que invoca o Cavaleiro Sombrio:
+        }
+
         if (enemy.nextAction.type === "summon_thieves") {
             enemy.hasSummoned = true;
             log(`💰 O Líder convocou a sua Gangue!`);
@@ -1044,9 +1116,6 @@ function endTurn() {
             executeMinionActionAndFinish();
             return;
         }
-
-        }
-        
 
         // B) Minigame: Cavaleiro (Ataque Pesado)
         if (enemy.name.includes("Cavaleiro") && enemy.nextAction.type === "dmg_heavy") {
@@ -1066,66 +1135,66 @@ function endTurn() {
         if (!enemy.stunned) {
             switch(enemy.nextAction.type) {
                 case "dmg":
-let dmg = enemy.nextAction.val;
+                    let dmg = enemy.nextAction.val;
+                    if (enemy.weakened) {
+                        dmg = Math.floor(dmg * 0.5);
+                        log("☠️ A maldição reduziu o dano!");
+                        enemy.weakened = false;
+                    }
+                    applyDamageToPlayer(dmg);
+                    log(`${enemy.name} atacou causando ${dmg} de dano!`);
+                    break;
 
-if(enemy.weakened){
-
-    dmg = Math.floor(dmg * 0.5);
-
-    log("☠️ A maldição reduziu o dano!");
-
-    enemy.weakened = false;
-    
-}
-            switch(enemy.nextAction.type) {
                 case "steal_gold":
-            let stolenBoss = Math.floor(Math.random() * 5) + 3; // Rouba de 3 a 7
-            if (gold >= stolenBoss) gold -= stolenBoss; else { stolenBoss = gold; gold = 0; }
-            if (stolenBoss > 0) log(`💸 ${enemy.name} atacou e roubou ${stolenBoss} moedas!`);
-            updateUI();
-            break;}
-applyDamageToPlayer(dmg);
-                    log(`${enemy.name} atacou!`);
+                    let stolenBoss = Math.floor(Math.random() * 5) + 3; // Rouba de 3 a 7
+                    if (gold >= stolenBoss) gold -= stolenBoss; else { stolenBoss = gold; gold = 0; }
+                    if (stolenBoss > 0) log(`💸 ${enemy.name} atacou e roubou ${stolenBoss} moedas!`);
                     break;
+
                 case "shield":
-                    enemy.enemyShield += enemy.nextAction.val;
-                    log(`${enemy.name} defendeu!`);
+enemy.enemyShield += enemy.nextAction.val;
+
+if(minion) minion.enemyShield = enemy.enemyShield;
+if(minion2) minion2.enemyShield = enemy.enemyShield;
+                    log(`${enemy.name} defendeu e ganhou +${enemy.nextAction.val}🛡️!`);
                     break;
-            case "knight_drain":
-                if (player.shield > 0) {
-                // 🛡️ ROUBA APENAS ESCUDO
-                let stolenShield = player.shield;
 
-                enemy.enemyShield += stolenShield;
-                player.shield = 0;
+                case "knight_drain":
+                    if (player.shield > 0) {
+                        let stolenShield = player.shield;
+                        enemy.enemyShield += stolenShield;
+                        player.shield = 0;
+                        log(`🛡️ O Cavaleiro drenou ${stolenShield} de seu escudo!`);
+                    } else {
+                        applyDamageToPlayer(enemy.nextAction.val);
+                        log(`🍷 DRENO! ${enemy.name} sugou ${enemy.nextAction.val} da sua vida!`);
+                    }
+                    enemy.hp = Math.min(enemy.maxHp, enemy.hp + 20); 
+                    log(`+20 HP para o Cavaleiro.`);
+                    break;
 
-                log(`🛡️ O Cavaleiro drenou ${stolenShield} de escudo!`);
-                } else {
-                // ❤️ SEM ESCUDO → CAUSA DANO NA VIDA
-                applyDamageToPlayer(enemy.nextAction.val);
-                log(`🍷 DRENO! ${enemy.name} drenou sua vida!`);
-                }
-
-                // Cura sempre acontece
-                enemy.hp = Math.min(enemy.maxHp, enemy.hp + 20); 
-                log(`+20 HP para o Cavaleiro.`);
-
-            updateUI(); 
-            break;
                 case "dragon_fire":
                     applyDamageToPlayer(enemy.nextAction.val);
                     enemy.enemyShield += 30;
-                    log(`${enemy.name} soprou fogo!`);
+                    log(`${enemy.name} soprou fogo causando ${enemy.nextAction.val} de dano e ganhou +30🛡️!`);
                     break;
+
                 case "dragon_rest":
                     enemy.hp = Math.min(enemy.maxHp, enemy.hp + 50);
-                    log(`${enemy.name} descansou.`);
-                    updateUI();
+                    log(`${enemy.name} descansou e recuperou +50 HP.`);
+                    break;
+
+                case "ativar_espinhos":
+                    log(`🌵 A Feiticeira preparou uma barreira de espinhos mágicos em todos os alvos!`);
+                    enemy.espinhosAtivos = true;
+                    if (minion) minion.espinhosAtivos = true;
+                    if (minion2) minion2.espinhosAtivos = true;
                     break;
             }
+
         }
         
-        // 3. Finaliza a ação do Boss e passa para o Lacaio/Fim do turno
+        // 3. Finaliza a ação do Boss e passa para os Lacaios
         executeMinionActionAndFinish();
         
     }, 600);
@@ -1330,8 +1399,14 @@ function updateUI() {
     // --- INTENÇÃO DO INIMIGO ---
     // ==========================================
     let combinedIntent = enemy.nextAction
-        ? `Boss: ${enemy.nextAction.text}`
+        ? `Inimigo: ${enemy.nextAction.text}`
         : "Aguardando...";
+
+// =====================================
+// FEITICEIRA NÃO DUPLICA AÇÕES
+// =====================================
+
+if (!enemy.name.includes("Feiticeira")) {
 
     if (minion && minion.hp > 0 && minion.nextAction) {
         combinedIntent += ` | ${minion.name}: ${minion.nextAction.text}`;
@@ -1340,6 +1415,7 @@ function updateUI() {
     if (minion2 && minion2.hp > 0 && minion2.nextAction) {
         combinedIntent += ` | ${minion2.name}: ${minion2.nextAction.text}`;
     }
+}
 
     if (intentText) intentText.innerText = combinedIntent;
 
@@ -1362,15 +1438,31 @@ function updateUI() {
         // Botão Boss
         htmlBotao += `<button onclick="setTarget('enemy')" style="background:${currentTarget === 'enemy' ? '#c0392b' : '#333'}; color:white; padding:8px 12px; border:none; border-radius:5px; cursor:pointer;">🎯 ${enemy.name}</button>`;
 
-        // Botão Lacaio 1 (Furtivo)
-        if (minion && minion.hp > 0) {
-            htmlBotao += `<button onclick="setTarget('minion')" style="background:${currentTarget === 'minion' ? '#2c3e50' : '#333'}; color:white; padding:8px 12px; border:none; border-radius:5px; cursor:pointer;">🎯 ${minion.name} (${Math.floor(minion.hp)}HP)</button>`;
-        }
+        htmlBotao += `
+<button onclick="setTarget('minion')"
+style="
+background:${currentTarget === 'minion' ? '#2c3e50' : '#333'};
+color:white;
+padding:8px 12px;
+border:none;
+border-radius:5px;
+cursor:pointer;
+">
+🎯 ${minion.name}
+</button>`;
         
-        // Botão Lacaio 2 (Bruto)
-        if (minion2 && minion2.hp > 0) {
-            htmlBotao += `<button onclick="setTarget('minion2')" style="background:${currentTarget === 'minion2' ? '#e67e22' : '#333'}; color:white; padding:8px 12px; border:none; border-radius:5px; cursor:pointer;">🎯 ${minion2.name} (${Math.floor(minion2.hp)}HP)</button>`;
-        }
+        htmlBotao += `
+<button onclick="setTarget('minion2')"
+style="
+background:${currentTarget === 'minion2' ? '#e67e22' : '#333'};
+color:white;
+padding:8px 12px;
+border:none;
+border-radius:5px;
+cursor:pointer;
+">
+🎯 ${minion2.name}
+</button>`;
 
         htmlBotao += `</div>`;
         targetUI.innerHTML = htmlBotao;
@@ -1428,64 +1520,171 @@ function setupEmojiSelection() {
 
 function prepareEnemyAction() {
     let actions;
-    if (enemy.name.includes("Dragão")) {
+
+if (enemy.name.includes("Feiticeira")) {
+
+    // PRIMEIRA VEZ
+    if (!enemy.hasSummoned) {
+
+        enemy.hasSummoned = true;
+
+        log("🔮 A Feiticeira criou duas ilusões perfeitas!");
+
+        minion = {
+            name: "Feiticeira",
+            hp: enemy.hp,
+            maxHp: enemy.maxHp,
+            img: "feiticeira.png",
+            nextAction: null,
+            bleedTurns: 0,
+            stunned: false,
+            enemyShield: 0
+        };
+
+        minion2 = {
+            name: "Feiticeira",
+            hp: enemy.hp,
+            maxHp: enemy.maxHp,
+            img: "feiticeira.png",
+            nextAction: null,
+            bleedTurns: 0,
+            stunned: false,
+            enemyShield: 0
+        };
+    }
+
+    // DEFINE QUAL É A VERDADEIRA
+    const targets = ["enemy", "minion", "minion2"];
+
+    witchRealTarget =
+        targets[Math.floor(Math.random() * targets.length)];
+
+    // REMOVE ESPINHOS ANTIGOS
+    thornedClone = null;
+
+    const actions = [
+
+        {
+            text: "Explosão Arcana (40 dano)",
+            type: "dmg",
+            val: 40
+        },
+
+        {
+            text: "Escudo Espelhado (30🛡️)",
+            type: "shield",
+            val: 30
+        },
+
+        {
+            text: "Espinhos Ilusórios 🌵",
+            type: "thorns",
+            val: 15
+        }
+    ];
+
+    enemy.nextAction =
+        actions[Math.floor(Math.random() * actions.length)];
+
+    // DEFINE QUAL CLONE TERÁ ESPINHOS
+    if(enemy.nextAction.type === "thorns") {
+
+        const fakeTargets =
+            targets.filter(t => t !== witchRealTarget);
+
+        thornedClone =
+            fakeTargets[Math.floor(Math.random() * fakeTargets.length)];
+    }
+
+    prepareMinionAction();
+
+    return;
+
+
+    } else if (enemy.name.includes("Ladrão")) {
+        if (!enemy.hasSummoned) { 
+            enemy.nextAction = { text: "Emboscar! 🗡️", type: "summon_thieves", val: 0 }; 
+            return; 
+        }
+        actions = [
+            { text: "Ataque Sujo (25 dano)", type: "dmg", val: 25 }, 
+            { text: "Roubar Ouro 💰", type: "steal_gold", val: 0 }
+        ];
+    
+    } else if (enemy.name.includes("Dragão")) {
         if (!enemy.hasSummoned) {
-            enemy.nextAction = { text: "Convocar Lacaio 📯", type: "summon_knight", val: 0 };
+            enemy.nextAction = { text: "Chamar Guarda! 🐉", type: "summon_knight", val: 0 };
             return;
         }
         actions = [
-            { text: "Sopro 🔥 (30+🛡️30)", type: "dragon_fire", val: 30 },
-            { text: "Descanso (+50 HP)", type: "dragon_rest", val: 50 },
-            { text: "Mordida (45 dano)", type: "dmg", val: 45 }
+            { text: "Sopro de Fogo (35 dano + 30🛡️)", type: "dragon_fire", val: 35 },
+            { text: "Mordida Brutal (25 dano)", type: "dmg", val: 40 },
+            { text: "Descanso do Dragão (+50 HP)", type: "dragon_rest", val: 0 }
         ];
-    } else if (enemy.name.includes("Cientista")) {
-        // Removido: Campo de Força (shield)
-        actions = [
-            { text: "Cálculo Letal 📐 (60 dano)", type: "sci_math", val: 60 },
-            { text: "Hipótese Escrita 📝 (70 dano)", type: "sci_type", val: 70 },
-            { text: "Lança-Chamas (40 dano)", type: "dmg", val: 50 }
-        ];
-    }else if (enemy.name.includes("Líder dos Ladrões")) {
-        // Removido o summon_thieves! Ele agora ataca diretamente.
-        actions = [
-            { text: "Ataque Sujo (25 dano)", type: "dmg", val: 25 },
-            { text: "Assalto (Rouba moedas)", type: "steal_gold", val: 0 },
-            { text: "Barreira Ladina (20🛡️)", type: "shield", val: 20 }
-        ];
+
     } else if (enemy.name.includes("Cavaleiro")) {
-        // Removido: Muralha (shield)
         actions = [
-            { text: "Dreno (25 + Cura 25)", type: "knight_drain", val: 35 },
-            { text: "Esmagar 30 de dano(PARRY!)", type: "dmg_heavy", val: 30 }
+            { text: "Ataque Pesado (30 dano) ⚠️", type: "dmg_heavy", val: 40 },
+            { text: "Dreno Vital (30 dano) 🍷", type: "knight_drain", val: 30 },
         ];
-    } else {
+
+    } else if (enemy.name.includes("Cientista")) {
         actions = [
-            { text: "Ataque (30 dano)", type: "dmg", val: 30 },
-            { text: "Barreira (25🛡️)", type: "shield", val: 25 }
+            { text: "Fórmula Matemática 🔬", type: "sci_math", val: 0 },
+            { text: "Composto Volátil 🧪", type: "sci_typing", val: 0 },
+            { text: "Ataque Químico (15 dano)", type: "dmg", val: 15 }
+        ];
+
+    } else {
+        // Inimigos básicos (Goblin, Golem, etc.)
+        actions = [
+            { text: "Ataque Básico (20 dano)", type: "dmg", val: 20 },
+            { text: "Defender (15🛡️)", type: "shield", val: 15 }
         ];
     }
-    
-    enemy.nextAction = actions[Math.floor(Math.random() * actions.length)];
-    prepareMinionAction();
-    updateUI();
+
+    // Sorteia a ação do Boss baseada no array definido acima
+    let randomAction = actions[Math.floor(Math.random() * actions.length)];
+    enemy.nextAction = randomAction;
+
+    // Prepara a ação dos lacaios/clones (se existirem)
+    if (typeof prepareMinionAction === "function") {
+        prepareMinionAction();
+    }
 }
 
 function prepareMinionAction() {
-    if (enemy.name.includes("Líder dos Ladrões")) {
-        let thiefActions = [
-            { text: "Ataque Furtivo (12 dano)", type: "dmg", val: 12 },
-            { text: "Proteger Líder (15 🛡️)", type: "shield_boss", val: 15 },
-            { text: "Pivete (Rouba moedas)", type: "steal_gold", val: 0 }
-        ];
-        if (minion && minion.hp > 0) minion.nextAction = thiefActions[Math.floor(Math.random() * thiefActions.length)];
-        if (minion2 && minion2.hp > 0) minion2.nextAction = thiefActions[Math.floor(Math.random() * thiefActions.length)];
-    } else if (enemy.name.includes("Dragão")) {
-        let dragonActions = [
-            { text: "Golpe de Lança (12 dano)", type: "dmg", val: 12 },
-            { text: "Proteger Dragão (15 🛡️)", type: "shield_boss", val: 15 }
-        ];
-        if (minion && minion.hp > 0) minion.nextAction = dragonActions[Math.floor(Math.random() * dragonActions.length)];
+    if (enemy.name.includes("Feiticeira")) {
+        if (minion) minion.nextAction = { text: enemy.nextAction.text, type: "clone_copy" };
+        if (minion2) minion2.nextAction = { text: enemy.nextAction.text, type: "clone_copy" };
+        return;
     }
+
+    if (minion) {
+        let mActions = minion.name.includes("Furtivo") 
+            ? [{ text: "Ataque Furtivo (12 dano)", type: "dmg", val: 12 }, { text: "Roubar Ouro 💰", type: "steal_gold", val: 0 }]
+            : [{ text: "Ataque (15 dano)", type: "dmg", val: 15 }, { text: "Proteção", type: "shield_boss", val: 15 }];
+        minion.nextAction = mActions[Math.floor(Math.random() * mActions.length)];
+    }
+    if (minion2) {
+        let m2Actions = [{ text: "Esmagar (20 dano)", type: "dmg", val: 20 }, { text: "Roubar Ouro 💰", type: "steal_gold", val: 0 }];
+        minion2.nextAction = m2Actions[Math.floor(Math.random() * m2Actions.length)];
+    }
+}
+
+function processSingleMinionAction(m) {
+    switch(m.nextAction.type) {
+        case "dmg":
+            applyDamageToPlayer(m.nextAction.val); log(`⚔️ ${m.name} atacou!`); break;
+        case "shield_boss":
+            enemy.enemyShield += m.nextAction.val; log(`🛡️ ${m.name} protegeu o Chefe!`); break;
+        case "steal_gold":
+            let amt = Math.floor(Math.random() * 5) + 3;
+            if (gold >= amt) gold -= amt; else { amt = gold; gold = 0; }
+            if (amt > 0) log(`💰 ${m.name} roubou ${amt} moedas!`);
+            break;
+    }
+    updateUI();
 }
 
 function checkGameOver() {
@@ -2264,57 +2463,80 @@ function updateEnergy(){
 
 }
 function aplicarEfeitoDeUpgrade(card) {
-    // Se a carta já foi melhorada, não deixa melhorar de novo (opcional)
+
     if (card.isUpgraded) {
         console.log("Esta carta já está no nível máximo!");
-        return false; // Retorna falso para avisar que não rolou upgrade
+        return false;
     }
 
-    // Marca que a carta foi melhorada
     card.isUpgraded = true;
-    
-    // Adiciona um "+" no nome para o jogador ver que ela tá bolada
+
+    const originalName = card.name;
+
     card.name = card.name + "+";
 
-    // Verifica qual é a carta e aplica o buff correspondente
-    switch (card.name.replace("+", "")) { // Tira o "+" temporariamente só pra checar o nome original
-        
+    switch (originalName) {
+
         case "Golpe":
-            card.cost = 0; // Custo zero!
-            // card.power += 5; // Se quisesse, poderia aumentar o dano também
+            card.cost = 0;
             break;
 
         case "Escudo":
-            card.cost = 0; // Custo zero!
+            card.cost = 0;
             break;
 
         case "Golpe Duplo":
-            // Supondo que você criou uma carta que tinha hits: 2
-            card.hits = 3; 
-            card.power += 2; // Dá um bônus de dano por hit também
+            card.hits = 3;
+            card.power += 2;
             break;
 
         case "Bola de Fogo":
-            card.power += 0; // Muito mais dano
-            card.cost = 1;    // Fica mais barata
+            card.power += 20;
+            card.cost = 1;
             break;
 
         case "Foco":
-            card.power += 1; // Agora dá 4 de energia em vez de 2
-            break;
-            case "Corte Duplo":
-            card.hits = 3;  // Adiciona o terceiro golpe aqui!
-            card.power += 1; // Opcional: dá um leve bônus de +1 de dano por corte
+            card.power += 1;
             break;
 
-        // Se a carta não tiver um upgrade específico programado, a gente dá um buff padrão
+        case "Corte Duplo":
+            card.hits = 3;
+            card.power += 1;
+            break;
+
+        // =====================================
+        // NOVOS UPGRADES
+        // =====================================
+
+        case "Lâmina Sombria":
+            card.cost = 1;
+            break;
+
+        case "Ataque Calculado":
+            card.power += 4;
+            break;
+
+        case "Reciclar":
+            card.draw = (card.draw || 1) + 1;
+            break;
+
+        case "Ataque Sombrio":
+            card.selfDamage = 5;
+            break;
+        case"arcane_storm":
+        card.power = + 2;
+        break;
+
         default:
-            if (card.power > 0) card.power += 10; // +10 de status base
-            if (card.cost > 1) card.cost -= 1;    // Reduz o custo em 1
+
+            if (card.power > 0) {
+                card.power += 10;
+            }
+
             break;
     }
-    
-    return true; // Retorna verdadeiro indicando que o upgrade foi um sucesso
+
+    return true;
 }
 function obterTextoPreviaUpgrade(card) {
     // Se a carta já estiver upada, avisa
@@ -2338,12 +2560,131 @@ function obterTextoPreviaUpgrade(card) {
             
         case "Foco":
             return "<span style='color: #2ecc71;'>🔋 Energia: +2 adicionais</span>";
-        
+        case "Lâmina Sombria":
+    return `
+        <span style='color:#2ecc71;'>
+            ⚡ Custo: reduzido para 1
+        </span>
+    `;
+
+case "Ataque Calculado":
+    return `
+        <span style='color:#2ecc71;'>
+            💥 Dano: +4
+        </span>
+    `;
+
+case "Reciclar":
+    return `
+        <span style='color:#2ecc71;'>
+            🃏 Compra +1 carta adicional
+        </span>
+    `;
+
+case "Ataque Sombrio":
+    return `
+        <span style='color:#2ecc71;'>
+            ❤️ Perda de vida: 10 ➜ 5
+        </span>
+    `;
+case"arcane_storm":
+return `
+        <span style='color:#2ecc71;'>
+            💥 Dano: +2
+        </span>
+    `;
         default:
             // Um texto padrão para qualquer outra carta que você criar
             let mudanca = "";
             if (card.power > 0) mudanca += `<span style='color: #2ecc71;'>💥 Status: +10</span><br>`;
-            if (card.cost > 0) mudanca += `<span style='color: #2ecc71;'>⚡ Custo: -1</span><br>`;
             return mudanca || "<span style='color: #f1c40f;'>Melhoria de atributos gerais!</span>";
     }
 }
+let witchRealTarget = "enemy";
+let thornedClone = null;
+function shuffleWitchClones() {
+
+    const positions = ["enemy", "minion", "minion2"];
+
+    // embaralha posições
+    positions.sort(() => Math.random() - 0.5);
+
+    witchRealTarget = positions[0];
+
+    // escolhe clone espinhoso
+    thornedClone = positions[
+        Math.floor(Math.random() * 2) + 1
+    ];
+
+    if(thornedClone === witchRealTarget){
+        thornedClone = positions[1];
+    }
+
+    // =====================================
+    // TROCA VISUAL DOS SPRITES
+    // =====================================
+
+    const enemyImg = document.getElementById("enemySprite");
+    const minionImg = document.getElementById("minionSprite");
+    const minion2Img = document.getElementById("minion2Sprite");
+
+    // todas parecem iguais
+    enemyImg.src = "feiticeira.png";
+    minionImg.src = "feiticeira.png";
+    minion2Img.src = "feiticeira.png";
+
+    // remove efeitos antigos
+    enemyImg.classList.remove("thorns");
+    minionImg.classList.remove("thorns");
+    minion2Img.classList.remove("thorns");
+
+    // adiciona brilho de espinhos
+    if(thornedClone === "enemy"){
+        enemyImg.classList.add("thorns");
+    }
+
+    if(thornedClone === "minion"){
+        minionImg.classList.add("thorns");
+    }
+
+    if(thornedClone === "minion2"){
+        minion2Img.classList.add("thorns");
+    }
+
+    log("🌀 As ilusões da Feiticeira mudaram!");
+}
+let witchPositions = {
+    enemy: "real",
+    minion: "fake",
+    minion2: "fake"
+};
+// ==========================================
+// --- SISTEMA DE MODO CLARO/ESCURO ---
+// ==========================================
+
+function toggleLightMode() {
+    const body = document.body;
+    body.classList.toggle('light-mode');
+    
+    const btn = document.getElementById('themeToggleBtn');
+    const isLight = body.classList.contains('light-mode');
+    
+    if (isLight) {
+        btn.innerText = "Ativar Modo Escuro 🌙";
+        localStorage.setItem('habitQuestTheme', 'light');
+    } else {
+        btn.innerText = "Ativar Modo Claro ☀️";
+        localStorage.setItem('habitQuestTheme', 'dark');
+    }
+}
+
+// Carrega a preferência salva quando a página carregar
+window.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('habitQuestTheme');
+    const btn = document.getElementById('themeToggleBtn');
+    
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        if (btn) btn.innerText = "Ativar Modo Escuro 🌙";
+    }
+});
