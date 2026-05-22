@@ -250,7 +250,7 @@
 
             <button class="sidebar-btn" data-screen="config">
                 <span>⚙️</span>
-                Config
+                Configurações
             </button>
 
         </nav>
@@ -272,6 +272,12 @@
     </div>
 
     <div class="energy-top-area">
+            <button 
+onclick="openEditHabitMenu()" 
+class="btn-sugestao mb-15"
+style="background:#9b59b6; box-shadow:0 4px 0 #6c3483; width:100%;">
+    ✏️ Editar Hábito
+</button>
 
 <button class="tab-btn beta-btn" id="btn-beta-tester">
     Beta tester
@@ -295,7 +301,7 @@
 
 <div id="modalNovoHabito" class="modal-overlay hidden">
     <div id="habitMenu" class="modal-content">
-        <h2 class="section-title text-center" style="margin-top: 0;">✨ Novo Hábito</h2>
+        <h2 class="section-title" id="habitMenuTitle">Criar Novo Hábito</h2>
 
         
         <div class="input-group" style="margin-bottom: 15px;">
@@ -336,7 +342,16 @@ placeholder="Descrição do hábito..."
             <label><input type="checkbox" class="day-checkbox" value="6"> Dom</label>
         </div>
 
-        <button onclick="addHabit()" class="btn-main mt-20">Criar Hábito</button>
+        <button onclick="saveHabit()" class="btn-main" id="saveHabitBtn">
+    Criar Hábito
+</button>
+
+<button onclick="deleteHabit()" 
+class="btn-main hidden" 
+id="deleteHabitBtn"
+style="background: #e74c3c; border-bottom: 5px solid #b03a2e;">
+    🗑️ Excluir Hábito
+</button>
         <button onclick="fecharModalHabito()" class="btn-close-modal mt-20">Cancelar</button>
     </div>
 </div>
@@ -592,5 +607,24 @@ function toggleDeckView(){
 }
 
 </script>
+<div id="editHabitOverlay" class="modal-overlay hidden">
+
+    <div class="habit-menu">
+
+        <h2 class="section-title">
+            ✏️ Escolha um hábito
+        </h2>
+
+        <div id="editHabitList"></div>
+
+        <button 
+            onclick="closeEditHabitMenu()"
+            class="btn-main mt-15">
+            Fechar
+        </button>
+
+    </div>
+
+</div>
 </body>
 </html>
