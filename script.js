@@ -5,14 +5,12 @@ let currentStage = 0;
 let gold = 0; 
 let shopUnlocked = false;
 
-
-
 const enemiesList = [
     { name: "Globin", hp: 45, maxHp: 45, color: "#27ae60", img: "globin.png" },
     { name: "Golem", hp: 90, maxHp: 90, color: "#e67e22", img: "golem.png" },
     { name: "Cavaleiro Sombrio", hp: 200, maxHp: 200, color: "#2c3e50", img: "cavaleiro.png" },
-    { name: "Feiticeira", hp: 120, maxHp: 200, color: "#8e44ad", img: "feiticeira.png" },
-    { name: "Líder dos Ladrões", hp: 160, maxHp: 160, color: "#f39c12", img: "liderladrao.png" }, // NOVO INIMIGO
+    { name: "Feiticeira", hp: 150, maxHp: 150, color: "#8e44ad", img: "feiticeira.png" },
+    { name: "Líder dos Ladrões", hp: 120, maxHp: 120, color: "#f39c12", img: "liderladrao.png" }, // NOVO INIMIGO
     { name: "Cientista", hp: 270, maxHp: 270, color: "#9b59b6", img: "cientista.png" },
     { name: "Dragão do Prazo Final", hp: 300, maxHp: 300, color: "#c0392b", img: "dragao.png" }
 ];
@@ -189,7 +187,7 @@ let availableRewards = [
     { name: "Tempo Parado", type: "time_stop", cost: 0, power: 0, img: "tempo.png", colorClass: "card-magia" },
     { name: "Boss Killer", type: "execute", cost: 2, power: 40, img: "bosskiller.png", colorClass: "card-espada" },
     { name: "Ataque Sombrio", type: "dark_atk", cost: 2, power: 50, selfDamage: 10, img: "ataquesombrio.png", colorClass: "card-ataque" },
-    { name: "Lâmina Sombria", type: "atk", effect: "bleed", cost: 2, power: 20, img: "laminasombria.png", colorClass: "card-espada" },
+    { name: "Lâmina Sombria", type: "sang", effect: "bleed", cost: 2, power: 20, img: "laminasombria.png", colorClass: "card-espada" },
     { name: "Veredito do Arcanjo", type: "magia", cost: 3, power: 60, img: "veredito.png", colorClass: "card-magia" },
     { name: "Preciso", type: "pierce", cost: 1, power: 20, img: "preciso.png", colorClass: "card-espada" },
     { name: "Bola de Fogo", type: "magia", cost: 2, power: 35, img: "boladefogo.png", colorClass: "card-magia" },
@@ -415,7 +413,7 @@ function startBattle() {
     // --- NOVO: SE FOR O LÍDER DOS LADRÕES, A GANGUE JÁ VEM JUNTO CORRENDO ---
     if (enemy.name.includes("Líder dos Ladrões")) {
         minion = { name: "Ladrão Furtivo", hp: 70, maxHp: 70, img: "ladraof.png", nextAction: null, bleedTurns: 0, stunned: false, enemyShield: 0 };
-        minion2 = { name: "Ladrão Bruto", hp: 90, maxHp: 90, img: "ladraob.png", nextAction: null, bleedTurns: 0, stunned: false, enemyShield: 0 };
+        minion2 = { name: "Ladrão Bruto", hp: 150, maxHp: 150, img: "ladraob.png", nextAction: null, bleedTurns: 0, stunned: false, enemyShield: 0 };
         log(`💰 O Líder dos Ladrões emboscou você junto com sua Gangue!`);
     } else {
         // Garante que eles comecem vazios em outros estágios
@@ -1068,16 +1066,27 @@ case "loop":
 }
 
 function endTurn() {
-
     const minigameOverlay = document.getElementById('minigameOverlay');
 
-    if (
-        !inBattle ||
-        skillCheckActive ||
-        (minigameOverlay && !minigameOverlay.classList.contains('hidden'))
-    ) {
+    // DEBUG: Veja no console (F12) o que está impedindo o turno
+    if (!inBattle) {
+        console.warn("Fim de turno ignorado: inBattle está false.");
         return;
     }
+    if (skillCheckActive) {
+        console.warn("Fim de turno ignorado: skillCheckActive está true.");
+        return;
+    }
+    if (minigameOverlay && !minigameOverlay.classList.contains('hidden')) {
+        console.warn("Fim de turno ignorado: Minigame ainda está aberto.");
+        log("🚫 Finalize o desafio primeiro!");
+        return;
+    }
+
+    // Se passou, prossegue...
+    log("Turno encerrado.");
+    // ... restante do seu código
+
      
     
     // 1. Limpeza de escudos e aplicação de status negativos (Sangramento/Queimadura)
@@ -1091,9 +1100,23 @@ function endTurn() {
     if (player.burnTurns > 0) { player.hp -= 8; player.burnTurns--; }
     updateUI();
 
-    // 2. Inicia o processamento do Boss
+// 2. Inicia o processamento do Boss
     setTimeout(() => {
-        if (enemy.hp <= 0) { checkGameOver(); return; }
+        if (enemy.hp <= 0) { 
+            // Verifica se a batalha realmente acabou
+            let jogoAcabou = checkGameOver(); 
+            
+            if (jogoAcabou) {
+                return; // Acabou a fase, para tudo por aqui.
+            } else {
+                // O chefe morreu, mas a batalha continua (lacaios vivos).
+                // Pula a ação do chefe e passa o turno direto para a gangue!
+                executeMinionActionAndFinish();
+                return; 
+            }
+        }
+        
+        // A) Regras de Convocação (Invocação de Lacaios)  
         
         // A) Regras de Convocação (Invocação de Lacaios)
         if (enemy.nextAction.type === "summon_knight") {
@@ -1110,7 +1133,7 @@ function endTurn() {
             enemy.hasSummoned = true;
             log(`💰 O Líder convocou a sua Gangue!`);
             minion = { name: "Ladrão Furtivo", hp: 70, maxHp: 70, img: "ladrao.png", nextAction: null, bleedTurns: 0, stunned: false, enemyShield: 0 };
-            minion2 = { name: "Ladrão Bruto", hp: 90, maxHp: 90, img: "ladrao.png", nextAction: null, bleedTurns: 0, stunned: false, enemyShield: 0 };
+            minion2 = { name: "Ladrão Bruto", hp: 150, maxHp: 150, img: "ladrao.png", nextAction: null, bleedTurns: 0, stunned: false, enemyShield: 0 };
             prepareMinionAction();
             updateUI();
             executeMinionActionAndFinish();
@@ -1271,7 +1294,7 @@ function getCardDescription(card) {
     switch(card.type) {
 
         case "atk":
-            return `Causa ${card.power} de dano ao inimigo, e aplica sangramento.`;
+            return `Causa ${card.power} de dano ao inimigo`;
 
         case "pierce":
             return `Ignora parte da defesa e causa ${card.power} de dano.`;
@@ -1435,34 +1458,18 @@ if (!enemy.name.includes("Feiticeira")) {
 
         let htmlBotao = `<div style="display:flex; gap:15px; align-items:center; justify-content:center; background:#222; padding:8px 15px; border-radius:8px; border:1px solid #444;">`;
         
-        // Botão Boss
+        // Botão do Boss (Sempre vivo se o grupo existe)
         htmlBotao += `<button onclick="setTarget('enemy')" style="background:${currentTarget === 'enemy' ? '#c0392b' : '#333'}; color:white; padding:8px 12px; border:none; border-radius:5px; cursor:pointer;">🎯 ${enemy.name}</button>`;
 
-        htmlBotao += `
-<button onclick="setTarget('minion')"
-style="
-background:${currentTarget === 'minion' ? '#2c3e50' : '#333'};
-color:white;
-padding:8px 12px;
-border:none;
-border-radius:5px;
-cursor:pointer;
-">
-🎯 ${minion.name}
-</button>`;
+        // PROTEÇÃO: Só desenha o botão do Lacaio 1 se ele ainda existir e tiver vida
+        if (minion && minion.hp > 0) {
+            htmlBotao += `<button onclick="setTarget('minion')" style="background:${currentTarget === 'minion' ? '#2c3e50' : '#333'}; color:white; padding:8px 12px; border:none; border-radius:5px; cursor:pointer;">🎯 ${minion.name}</button>`;
+        }
         
-        htmlBotao += `
-<button onclick="setTarget('minion2')"
-style="
-background:${currentTarget === 'minion2' ? '#e67e22' : '#333'};
-color:white;
-padding:8px 12px;
-border:none;
-border-radius:5px;
-cursor:pointer;
-">
-🎯 ${minion2.name}
-</button>`;
+        // PROTEÇÃO: Só desenha o botão do Lacaio 2 se ele ainda existir e tiver vida
+        if (minion2 && minion2.hp > 0) {
+            htmlBotao += `<button onclick="setTarget('minion2')" style="background:${currentTarget === 'minion2' ? '#e67e22' : '#333'}; color:white; padding:8px 12px; border:none; border-radius:5px; cursor:pointer;">🎯 ${minion2.name}</button>`;
+        }
 
         htmlBotao += `</div>`;
         targetUI.innerHTML = htmlBotao;
@@ -1607,7 +1614,7 @@ if (enemy.name.includes("Feiticeira")) {
             return; 
         }
         actions = [
-            { text: "Ataque Sujo (25 dano)", type: "dmg", val: 25 }, 
+            { text: "Ataque Sujo (35 dano)", type: "dmg", val: 35 }, 
             { text: "Roubar Ouro 💰", type: "steal_gold", val: 0 }
         ];
     
@@ -1688,32 +1695,82 @@ function processSingleMinionAction(m) {
 }
 
 function checkGameOver() {
+    // 1. Verifica se o Chefe morreu
     if (enemy.hp <= 0) {
+        
+        // --- CHECAGEM DE BANDO ---
+        if (enemy.name === "Líder dos Ladrões") {
+            let lacaio1Vivo = minion && minion.hp > 0;
+            let lacaio2Vivo = minion2 && minion2.hp > 0;
+
+            // Se ainda tiver lacaio vivo, a batalha continua
+            if (lacaio1Vivo || lacaio2Vivo) {
+                if (currentTarget === 'enemy') {
+                    if (lacaio1Vivo) currentTarget = 'minion';
+                    else if (lacaio2Vivo) currentTarget = 'minion2';
+                }
+                updateUI();
+                return false; 
+            }
+        }
+
+        // --- FIM DA BATALHA ---
         inBattle = false;
         const reward = Math.floor(Math.random() * 11) + 15; 
         gold += reward;
-        // DESBLOQUEIA A LOJA
-// --- NOVO CÓDIGO DE DESTRANCAR A LOJA AQUI ---
-        if (enemy.name.includes("Cavaleiro") || enemy.name.includes("Cientista")) {
-            shopUnlocked = true;
-            log("🛒 O caminho está seguro. A Loja do Viajante foi destrancada!");
-        } {
-    shopUnlocked = true;
 
-    log("🏪 A Loja foi desbloqueada!");
-}
+        // Desbloqueia a loja (agora de forma simples e organizada)
+        shopUnlocked = true;
+        log("🏪 A Loja foi desbloqueada!");
         log(`Vitória! Você coletou 💰 ${reward} moedas.`);
         
+        // Limpeza geral
         minion = null;
+        minion2 = null; 
         currentTarget = "enemy";
         currentHand = [];
         overloadedNextTurn = false;
         lastPlayedCard = null;
+        
         updateUI();
         showRewardChoice();
-    } else if (player.hp <= 0) {
-        alert("GAME OVER!"); location.reload();
+        return true; 
+        
+    } 
+    
+    // 2. Verifica se o jogador morreu
+    else if (player.hp <= 0) {
+        alert("GAME OVER!"); 
+        location.reload();
+        return true;
     }
+    
+    return false;
+}
+function processSingleMinionAction(m) {
+    if (!m || !m.nextAction) return;
+
+    switch(m.nextAction.type) {
+        case "dmg":
+            applyDamageToPlayer(m.nextAction.val); 
+            log(`⚔️ ${m.name} atacou!`); 
+            break;
+        case "shield_boss":
+            enemy.enemyShield += m.nextAction.val; 
+            log(`🛡️ ${m.name} protegeu o Chefe!`); 
+            break;
+        case "steal_gold":
+            let amt = Math.floor(Math.random() * 5) + 3;
+            if (gold >= amt) {
+                gold -= amt;
+            } else {
+                amt = gold;
+                gold = 0;
+            }
+            if (amt > 0) log(`💰 ${m.name} roubou ${amt} moedas!`);
+            break;
+    }
+    updateUI();
 }
 // ==========================================
 // --- RECOMPENSAS E ESTÁGIOS ---
@@ -1791,6 +1848,9 @@ function nextStageSetup() {
     enemy = { ...enemiesList[currentStage], nextAction: null, bleedTurns: 0, stunned: false, enemyShield: 0, hasSummoned: false };
     const btnStart = document.getElementById('btnStartBattle');
     if(btnStart) btnStart.classList.remove('hidden');
+    minion = null;  // Limpa o lacaio 1 da fase anterior
+    minion2 = null; // Limpa o lacaio 2 da fase anterior
+    currentTarget = 'enemy'; // Força a sua mira voltar para o Boss novo
     updateUI();
 }
 
@@ -1827,6 +1887,8 @@ function showEnergyGain(amount) {
 
 let meusHabitos = []; 
 let consecutiveDays = 1; 
+let editingHabitId = null;
+
 
 function renderHabitsForToday() {
     const pendingContainer = document.getElementById('habitList');
@@ -1924,12 +1986,24 @@ function completeHabit(id) {
 /**
  * Alterna a visibilidade do menu de hábitos
  */
-function toggleHabitMenu() {
+function toggleHabitMenu(forceOpen = false) { 
     const menu = document.getElementById('habitMenu');
-    if (menu) {
-        menu.classList.toggle('hidden');
+
+    if (!menu) return;
+
+    if (forceOpen) {
+        menu.classList.remove('hidden');
+        return;
+    }
+
+    menu.classList.toggle('hidden');
+
+    if (menu.classList.contains('hidden')) {
+        resetHabitMenu();
     }
 }
+
+
 
 function toggleDaysSelector() {
     const tipo = document.getElementById('habitType').value;
@@ -2193,6 +2267,143 @@ function addHabit() {
     // fecha modal
     fecharModalHabito();
 }
+function openEditHabitMenu() {
+
+    if (meusHabitos.length === 0) {
+        alert("Você ainda não possui hábitos.");
+        return;
+    }
+
+    let nomes = meusHabitos.map((h, i) => {
+        return `${i + 1} - ${h.nome}`;
+    }).join("\n");
+
+    let escolha = prompt(
+        "Escolha o número do hábito:\n\n" + nomes
+    );
+
+    let index = parseInt(escolha) - 1;
+
+    if (isNaN(index) || !meusHabitos[index]) return;
+
+    loadHabitToEditor(meusHabitos[index]);
+}
+
+function loadHabitToEditor(habit) {
+
+    editingHabitId = habit.id;
+
+    toggleHabitMenu(true);
+
+    document.getElementById('habitMenuTitle').innerText =
+        "Editar Hábito";
+
+    document.getElementById('saveHabitBtn').innerText =
+        "💾 Salvar Alterações";
+
+    document.getElementById('deleteHabitBtn')
+        .classList.remove('hidden');
+
+    // REMOVE O EMOJI DO NOME
+    let nomeSemEmoji = habit.nome.replace(/^(\p{Emoji_Presentation}|\p{Extended_Pictographic})\s*/u, '');
+
+    document.getElementById('habitInput').value =
+        nomeSemEmoji;
+
+    document.getElementById('habitDifficulty').value =
+        habit.recompensa;
+
+    document.getElementById('habitType').value =
+        habit.tipo;
+
+    selectedIcon = habit.nome.split(" ")[0];
+
+    document.querySelectorAll('.emoji-item').forEach(el => {
+
+        el.classList.remove('selected');
+
+        if (
+            el.dataset.icon === selectedIcon ||
+            el.textContent === selectedIcon
+        ) {
+            el.classList.add('selected');
+        }
+    });
+
+    toggleDaysSelector();
+
+    document.querySelectorAll('.day-checkbox')
+        .forEach(box => {
+
+            box.checked = false;
+
+            if (
+                habit.dias &&
+                habit.dias.includes(parseInt(box.value))
+            ) {
+                box.checked = true;
+            }
+        });
+}
+
+function saveHabit() {
+
+    if (editingHabitId !== null) {
+        updateHabit();
+    } else {
+        addHabit();
+    }
+}
+
+function updateHabit() {
+
+    const habit =
+        meusHabitos.find(h => h.id === editingHabitId);
+
+    if (!habit) return;
+
+    const nome =
+        document.getElementById('habitInput')
+            .value.trim();
+
+    if (!nome) {
+        alert("Digite o nome do hábito!");
+        return;
+    }
+
+    const tipo =
+        document.getElementById('habitType').value;
+
+    const diasSelecionados =
+        tipo === "semanal"
+            ? getSelectedDays()
+            : [];
+
+    if (
+        tipo === "semanal" &&
+        diasSelecionados.length === 0
+    ) {
+        alert("Selecione os dias.");
+        return;
+    }
+
+    habit.nome = `${selectedIcon} ${nome}`;
+
+    habit.tipo = tipo;
+
+    habit.recompensa = parseInt(
+        document.getElementById('habitDifficulty').value
+    );
+
+    habit.dias = diasSelecionados;
+
+    resetHabitMenu();
+
+    renderHabitsForToday();
+
+    log(`✏️ Hábito atualizado!`);
+}
+
 // =====================================
 // SISTEMA DE NAVEGAÇÃO
 // =====================================
@@ -2688,3 +2899,238 @@ window.addEventListener('DOMContentLoaded', () => {
         if (btn) btn.innerText = "Ativar Modo Escuro 🌙";
     }
 });
+function openEditHabitMenu() {
+
+    if (meusHabitos.length === 0) {
+        alert("Você ainda não possui hábitos.");
+        return;
+    }
+
+    const overlay =
+        document.getElementById("editHabitOverlay");
+
+    const list =
+        document.getElementById("editHabitList");
+
+    list.innerHTML = "";
+
+    meusHabitos.forEach(habit => {
+
+        const card = document.createElement("div");
+
+        card.className = "edit-habit-card";
+
+        card.innerHTML = `
+            <div class="edit-habit-title">
+                ${habit.nome}
+            </div>
+
+            <div class="edit-habit-desc">
+                ${habit.descricao || "Sem descrição"}
+            </div>
+        `;
+
+        card.onclick = () => {
+
+            closeEditHabitMenu();
+
+            loadHabitToEditor(habit);
+        };
+
+        list.appendChild(card);
+    });
+
+    overlay.classList.remove("hidden");
+}
+function closeEditHabitMenu() {
+
+    document
+        .getElementById("editHabitOverlay")
+        .classList.add("hidden");
+}
+
+function loadHabitToEditor(habit) {
+
+    editingHabitId = habit.id;
+
+    abrirModalHabito();
+
+    document.getElementById('habitMenuTitle').innerText =
+        "Editar Hábito";
+
+    document.getElementById('saveHabitBtn').innerText =
+        "💾 Salvar Alterações";
+
+    document.getElementById('deleteHabitBtn')
+        .classList.remove('hidden');
+
+    // remove emoji do começo
+    let nomeSemEmoji = habit.nome.replace(
+        /^(\p{Emoji_Presentation}|\p{Extended_Pictographic})\s*/u,
+        ''
+    );
+
+    document.getElementById('habitInput').value =
+        nomeSemEmoji;
+
+    document.getElementById("habitDescription").value =
+        habit.descricao || "";
+
+    document.getElementById('habitDifficulty').value =
+        habit.recompensa;
+
+    document.getElementById('habitType').value =
+        habit.tipo;
+
+    selectedIcon = habit.nome.split(" ")[0];
+
+    document.querySelectorAll('.emoji-item').forEach(el => {
+
+        el.classList.remove('selected');
+
+        if (
+            el.dataset.icon === selectedIcon ||
+            el.textContent === selectedIcon
+        ) {
+            el.classList.add('selected');
+        }
+    });
+
+    toggleDaysSelector();
+
+    document.querySelectorAll('.day-checkbox')
+        .forEach(box => {
+
+            box.checked = false;
+
+            if (
+                habit.dias &&
+                habit.dias.includes(parseInt(box.value))
+            ) {
+                box.checked = true;
+            }
+        });
+}
+
+function saveHabit() {
+
+    if (editingHabitId !== null) {
+        updateHabit();
+    } else {
+        addHabit();
+    }
+}
+
+function updateHabit() {
+
+    const habit =
+        meusHabitos.find(h => h.id === editingHabitId);
+
+    if (!habit) return;
+
+    const nome =
+        document.getElementById('habitInput')
+            .value.trim();
+
+    if (!nome) {
+        alert("Digite o nome do hábito!");
+        return;
+    }
+
+    const tipo =
+        document.getElementById('habitType').value;
+
+    const diasSelecionados =
+        tipo === "semanal"
+            ? getSelectedDays()
+            : [];
+
+    if (
+        tipo === "semanal" &&
+        diasSelecionados.length === 0
+    ) {
+        alert("Selecione os dias.");
+        return;
+    }
+
+    habit.nome = `${selectedIcon} ${nome}`;
+
+    habit.descricao =
+        document.getElementById("habitDescription").value;
+
+    habit.tipo = tipo;
+
+    habit.recompensa = parseInt(
+        document.getElementById('habitDifficulty').value
+    );
+
+    habit.dias = diasSelecionados;
+
+    resetHabitMenu();
+
+    fecharModalHabito();
+
+    renderHabitsForToday();
+
+    log(`✏️ Hábito atualizado!`);
+}
+
+function deleteHabit() {
+
+    if (editingHabitId === null) return;
+
+    const habit =
+        meusHabitos.find(h => h.id === editingHabitId);
+
+    if (!habit) return;
+
+    const confirmar = confirm(
+        `Excluir "${habit.nome}"?`
+    );
+
+    if (!confirmar) return;
+
+    meusHabitos =
+        meusHabitos.filter(
+            h => h.id !== editingHabitId
+        );
+
+    resetHabitMenu();
+
+    fecharModalHabito();
+
+    renderHabitsForToday();
+
+    log("🗑️ Hábito excluído!");
+}
+
+function resetHabitMenu() {
+
+    editingHabitId = null;
+
+    document.getElementById('habitMenuTitle')
+        .innerText = "Criar Novo Hábito";
+
+    document.getElementById('saveHabitBtn')
+        .innerText = "Criar Hábito";
+
+    document.getElementById('deleteHabitBtn')
+        .classList.add('hidden');
+
+    document.getElementById('habitInput').value = "";
+
+    document.getElementById("habitDescription").value = "";
+
+    document.getElementById('habitDifficulty').value = "5";
+
+    document.getElementById('habitType').value =
+        "diario";
+
+    document.querySelectorAll('.day-checkbox')
+        .forEach(cb => cb.checked = false);
+
+    toggleDaysSelector();
+}
+window.openEditHabitMenu = openEditHabitMenu;
+window.saveHabit = saveHabit;
+window.deleteHabit = deleteHabit;
