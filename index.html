@@ -150,26 +150,58 @@
     <div id="shopModal" class="hidden">
         <h2 class="text-gold upper">🏪 Mercado do Viajante</h2>
         <p style="color: #bdc3c7;">Moedas: <span class="text-gold" style="font-weight: bold;">💰 <span id="goldValue">0</span></span></p>
-        
-        <div class="shop-grid">
-            <div class="shop-item hp" onclick="buyItem('hp', 50)">
-                <div style="text-align: left;">
-                    <div style="color: #ff7675; font-weight: bold;">Poção de Vida</div>
-                    <div style="font-size: 0.8em; color: #eee;">Recupera 50 de Vida</div>
-                </div>
-                <div class="text-gold">💰 50</div>
+
+<div class="shop-grid">
+
+    <div class="shop-item hp" onclick="buyItem('hp', 50)">
+        <div style="text-align: left;">
+            <div style="color: #ff7675; font-weight: bold;">
+                Poção de Vida
             </div>
 
-            <div class="shop-item energy" onclick="buyItem('energy', 30)">
-                <div style="text-align: left;">
-                    <div style="color: #74b9ff; font-weight: bold;">Poção de Energia</div>
-                    <div style="font-size: 0.8em; color: #eee;">+3 Energia na Reserva</div>
-                </div>
-                <div class="text-gold">💰 30</div>
+            <div style="font-size: 0.8em; color: #eee;">
+                Recupera 50 de Vida
             </div>
         </div>
 
-        <button onclick="toggleShop()" class="btn-main mt-20" style="background: #95a5a6; box-shadow: 0 4px 0 #7f8c8d;">Voltar ao Jogo</button>
+        <div class="text-gold">💰 50</div>
+    </div>
+
+    <div class="shop-item energy" onclick="buyItem('energy', 30)">
+        <div style="text-align: left;">
+            <div style="color: #74b9ff; font-weight: bold;">
+                Poção de Energia
+            </div>
+
+            <div style="font-size: 0.8em; color: #eee;">
+                +3 Energia na Reserva
+            </div>
+        </div>
+
+        <div class="text-gold">💰 30</div>
+    </div>
+
+    <!-- CARTA -->
+    <div class="shop-item" onclick="buyRandomCardPack()">
+
+        <div style="text-align: left;">
+            <div style="color: #f1c40f; font-weight: bold;">
+                🃏 Carta Misteriosa
+            </div>
+
+            <div style="font-size: 0.8em; color: #eee;">
+                Escolha entre 2 cartas aleatórias
+            </div>
+        </div>
+
+        <div class="text-gold">💰 30</div>
+
+    </div>
+
+</div>
+<button onclick="fecharLoja()" class="btn-main mt-20" style="background: #95a5a6; box-shadow: 0 4px 0 #7f8c8d;">
+    Voltar ao Jogo
+</button>
     </div>
 
     <div id="parryOverlay" class="hidden">
@@ -349,7 +381,7 @@ placeholder="Descrição do hábito..."
 <button onclick="deleteHabit()" 
 class="btn-main hidden" 
 id="deleteHabitBtn"
-style="background: #e74c3c; border-bottom: 5px solid #b03a2e;">
+style="background-color:#e74c3c !important; border-bottom:5px solid #b03a2e !important;">
     🗑️ Excluir Hábito
 </button>
         <button onclick="fecharModalHabito()" class="btn-close-modal mt-20">Cancelar</button>
@@ -563,7 +595,6 @@ window.addEventListener('DOMContentLoaded', () => {
     if (typeof setupEmojiSelection === "function") {
         setupEmojiSelection();
     }
-    renderShop();
 
     const sidebarButtons = document.querySelectorAll('.sidebar-btn');
     const screens = document.querySelectorAll('.screen');
