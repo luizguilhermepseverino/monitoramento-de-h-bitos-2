@@ -2300,7 +2300,7 @@ BOTÕES
             135deg,
             #4a90e2,
             #2563eb
-        ) !important;
+        );
 
     box-shadow:
         0 8px 20px rgba(37,99,235,0.22) !important;
@@ -3231,10 +3231,10 @@ BOTÕES
             135deg,
             #3b82f6,
             #2563eb
-        ) !important;
+        );
 
     box-shadow:
-        0 10px 20px rgba(37,99,235,0.25) !important;
+        0 10px 20px rgba(37,99,235,0.25);
 }
 
 .btn-main:hover{
@@ -3372,9 +3372,94 @@ SCROLLBAR
     color:#aaa;
     font-size:14px;
 }
+/* Procure pelo seletor do botão Beta Tester (ex: #btnBetaTester ou .btn-beta) e adicione/mude para isso: */
+#btnBetaTester {
+    min-height: 42px;
+    padding: 10px 16px;
+    font-size: 0.75rem;
+    border-radius: 14px;
+    min-width: 140px; /* Mesma largura base do botão de cima */
+    text-align: center;
+    box-sizing: border-box;
+    display: inline-block;
+    margin-top: 10px; /* Dá um espacinho para não colar no botão de cima */
+}
 
+/* Caso queira empurrar o botão de editar para baixo do título "Novo Hábito": */
+.modal-header {
+    display: flex;
+    flex-direction: column; /* Alinha o título em cima e o botão embaixo */
+    gap: 10px; /* Cria um espaço elegante entre eles */
+    align-items: center; /* Centraliza ambos */
+    margin-bottom: 15px;
+}
 
+/* Localize o container do topo dessa barra lateral e aplique: */
+.sidebar-top-container, .habit-menu-header {
+    display: block; /* Força os elementos a respeitarem a ordem (um embaixo do outro) */
+    text-align: center;
+    padding: 15px;
+}
 
+/* ==================================================
+   CORREÇÃO AJUSTADA DE ACORDO COM O SEU HTML
+================================================== */
+
+/* Organiza o topo da seção de energia e botões */
+.energy-top-area {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    margin-bottom: 15px !important;
+}
+
+/* 1. Alvo real do botão de Editar Hábito do seu HTML */
+button[onclick*="openEditHabitMenu"] {
+    display: block !important;
+    width: 100% !important;
+    min-height: 42px !important;
+    padding: 10px 16px !important;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    border-radius: 14px !important;
+    text-align: center !important;
+    border: none !important;
+    background: #9b59b6 !important; /* Roxo */
+    box-shadow: 0 4px 0 #6c3483 !important;
+    color: white !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+    transition: transform 0.1s, filter 0.2s !important;
+}
+
+/* 2. Alvo real usando o ID exato do seu HTML: btn-beta-tester */
+#btn-beta-tester {
+    display: block !important;
+    width: 100% !important;
+    min-height: 42px !important;
+    padding: 10px 16px !important;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    border-radius: 14px !important;
+    text-align: center !important;
+    border: none !important;
+    background: #f1c40f !important; /* Amarelo Gold */
+    box-shadow: 0 4px 0 #9a7d0a !important;
+    color: #1a1a2e !important;
+    cursor: pointer !important;
+    margin: 0 0 5px 0 !important;
+    transition: transform 0.1s, filter 0.2s !important;
+}
+
+/* Efeito de clique e hover premium para ambos os botões */
+button[onclick*="openEditHabitMenu"]:hover, #btn-beta-tester:hover {
+    filter: brightness(1.12) !important;
+}
+
+button[onclick*="openEditHabitMenu"]:active, #btn-beta-tester:active {
+    transform: translateY(2px) !important;
+    box-shadow: none !important;
+}
 
 
 
@@ -3469,765 +3554,502 @@ SCROLLBAR
 
 
 /* ==================================================
-   MOBILE LIMPO DEFINITIVO
+   MOBILE LIMPO E DEFINITIVO
 ================================================== */
 
-@media (max-width:768px){
+@media (max-width:768px) {
 
-    html,
-    body{
-        margin:0;
-        padding:0;
-
-        width:100%;
-        min-height:100dvh;
-
-        overflow-x:hidden;
-        overflow-y:auto;
-
-        background:#070b14;
+    /* ======================================
+       1. CONFIGURAÇÕES GERAIS E APP
+    ====================================== */
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100vw; /* Usando vw para garantir que não vaze a tela */
+        min-height: 100dvh;
+        overflow-x: hidden;
+        overflow-y: auto;
+        background: #070b14;
+        position: relative;
+        box-sizing: border-box;
     }
 
-    body{
-        position:relative;
+    *, *:before, *:after {
+        box-sizing: border-box; /* Garante que paddings não quebrem o width */
     }
 
-    /* APP */
-
-    .app-container{
-        width:100%;
-
-        display:flex;
-        flex-direction:column;
-
-        min-height:100dvh;
-
-        padding:12px;
-        padding-bottom:95px;
-
-        box-sizing:border-box;
-
-        overflow:visible;
+    .app-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        min-height: 100dvh;
+        padding: 12px;
+        padding-bottom: 95px; /* Espaço para a sidebar */
+        overflow: hidden; 
     }
 
-    /* ==================================================
-       SIDEBAR FIXA EMBAIXO
-    ================================================== */
-
-    .main-sidebar{
-        position:fixed !important;
-
-        bottom:0 !important;
-        left:0 !important;
-
-        width:100% !important;
-        height:78px !important;
-
-        z-index:999999 !important;
-
-        display:flex !important;
-        flex-direction:row !important;
-
-        justify-content:center !important;
-        align-items:center !important;
-
-        background:#0b1220 !important;
-
-        border-top:
-            1px solid rgba(255,255,255,0.08);
-
-        backdrop-filter:blur(12px);
-
-        padding:0 !important;
-        margin:0 !important;
-    }
-
-    .sidebar-menu{
-        width:100%;
-        height:100%;
-
-        display:flex !important;
-
-        flex-direction:row !important;
-
-        justify-content:space-around;
-        align-items:center;
-
-        gap:0;
-    }
-
-    .sidebar-btn{
-        flex:1;
-
-        height:100%;
-
-        display:flex !important;
-        flex-direction:column !important;
-
-        justify-content:center;
-        align-items:center;
-
-        gap:4px;
-
-        border:none;
-        background:none;
-
-        color:white;
-
-        font-size:0.68rem;
-
-        padding:4px;
-    }
-
-    .sidebar-logo{
-        display:none !important;
-    }
-
-    /* ==================================================
-       TELAS
-    ================================================== */
-
+    /* Telas e Seções Gerais */
     .screen,
     .screen.active-screen,
     .habits-section,
     .game-section,
-    #screen-history,
     #screen-shop,
     #screen-cards,
-    #screen-battle{
-        width:100% !important;
-        max-width:100% !important;
-
-        height:auto !important;
-        min-height:auto !important;
-        max-height:none !important;
-
-        margin:0 !important;
-
-        overflow:visible !important;
-
-        box-sizing:border-box;
+    #screen-battle,
+    #screen-history {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
     }
 
-    .screen.active-screen{
-        display:flex;
-        flex-direction:column;
+    .screen.active-screen {
+        display: flex;
+        flex-direction: column;
     }
 
-    /* ==================================================
-       HÁBITOS
+    /* ======================================
+       2. CRIAÇÃO DE HÁBITOS E MODAIS (Fix de Vazamento)
+    ====================================== */
+    .habit-creator, 
+    .modal-content, 
+    .login-box {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important; 
+        overflow-x: hidden;
+    }
+
+    .habits-section {
+        padding: 14px;
+        border-radius: 18px;
+    }
+
+    .habit-item {
+        width: 100%;
+        padding: 16px;
+        border-radius: 18px;
+    }
+
+    .login-box {
+        padding: 24px;
+    }
+
+/* ==================================================
+       MODAIS E CRIADOR DE HÁBITOS (CORREÇÃO DE ALINHAMENTO)
     ================================================== */
-
-    .habits-section{
-        padding:14px;
-        border-radius:18px;
+    
+    .modal-overlay {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100dvh !important; /* Usa dvh para lidar com a barra do iOS */
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 15px !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important; /* Impede o scroll de vazar no overlay */
+        z-index: 99999 !important; /* Garante que fique acima de tudo */
     }
 
-    .habit-item{
-        width:100%;
-
-        padding:16px;
-
-        border-radius:18px;
-
-        box-sizing:border-box;
+    .modal-content, 
+    .habit-creator {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+        transform: none !important; /* Reseta qualquer transform vindo do desktop */
+        margin: 0 !important; 
+        width: 100% !important;
+        max-width: 90vw !important; /* Garante uma margem de respiro nas laterais */
+        max-height: 85dvh !important;
+        overflow-y: auto !important; /* Scroll apenas dentro do modal */
+        box-sizing: border-box !important;
     }
 
-    /* ==================================================
-       BATALHA
+/* ==================================================
+       HISTÓRICO, GRÁFICOS E STREAKS (MOBILE)
     ================================================== */
-
-    .battle-screen{
-        width:100%;
-
-        display:flex;
-        flex-direction:column;
-
-        align-items:center;
-
-        gap:18px;
-
-        padding:10px;
-        padding-bottom:30px;
-
-        overflow:visible !important;
+    
+    #screen-history {
+        width: 100% !important;
+        /* Foi removido o display: flex !important; daqui! */
+        flex-direction: column !important;
+        gap: 20px !important;
+        padding: 16px 12px 140px !important; /* Aumenta o espaço inferior para a navbar */
+        box-sizing: border-box !important;
     }
 
-    .battle-entities{
-        width:100%;
-
-        display:flex;
-
-        justify-content:space-evenly;
-        align-items:flex-start;
-
-        gap:10px;
+    /* Container do Gráfico: dá espaço máximo nas laterais */
+    .chart-container {
+        position: relative !important;
+        width: 100% !important;
+        background: rgba(11, 18, 32, 0.4) !important;
+        border-radius: 16px !important;
+        padding: 16px 8px !important; /* Menos padding horizontal pro gráfico expandir */
+        box-sizing: border-box !important;
+        min-height: 320px !important; /* Força uma altura mínima digna pro gráfico */
+        height: auto !important;
     }
 
-    .entity{
-        width:45%;
-
-        display:flex;
-        flex-direction:column;
-
-        align-items:center;
+    /* Força o elemento canvas a ocupar toda a largura disponível */
+    #screen-history canvas {
+        width: 100% !important;
+        height: 100% !important;
+        max-height: 340px !important;
+        display: block !important;
     }
 
-    .entity img,
-    .sprite-container{
-        width:82px;
-        height:82px;
-
-        object-fit:contain;
+    /* Container das informações de Streak / Ofensiva */
+    .streak-container,
+    .streak-wrapper,
+    .history-stats,
+    .stats-grid {
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important; /* Se a tela for muito fina, ele quebra em duas linhas automaticamente */
+        justify-content: space-between !important;
+        gap: 12px !important;
+        box-sizing: border-box !important;
+        margin-bottom: 10px !important;
     }
 
-    /* ==================================================
-       CONTROLES
-    ================================================== */
-
-    .game-controls{
-        width:100%;
-
-        display:flex;
-        flex-wrap:wrap;
-
-        justify-content:center;
-        align-items:center;
-
-        gap:10px;
-
-        padding:12px;
-
-        box-sizing:border-box;
+    /* Cards individuais de Streak/Estatísticas */
+    .streak-card,
+    .streak-box,
+    .stat-item {
+        flex: 1 !important;
+        min-width: 140px !important; /* Impede que fiquem muito estreitos e esmaguem o texto */
+        background: #0b1220 !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        padding: 14px 10px !important;
+        border-radius: 14px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        box-sizing: border-box !important;
     }
 
-    /* ==================================================
-       CARTAS
-    ================================================== */
-
-    .hand{
-        width:100%;
-
-        display:flex;
-
-        gap:10px;
-
-        overflow-x:auto;
-        overflow-y:hidden;
-
-        padding-bottom:10px;
-
-        -webkit-overflow-scrolling:touch;
+    /* Ajuste de tamanho de fontes internas dos streaks para mobile */
+    .streak-card h3, .stat-item p {
+        font-size: 0.85rem !important;
+        margin: 0 !important;
+        text-align: center !important;
+    }
+    
+    .streak-card .value, .stat-item .number {
+        font-size: 1.2rem !important;
+        font-weight: bold !important;
     }
 
-    .hand::-webkit-scrollbar{
-        display:none;
+    /* ======================================
+       4. GRIDS - UPGRADES E STATS 
+       (Atenção: Cartas foram removidas daqui para não bugar)
+    ====================================== */
+    .upgrade-grid-container {
+        display: grid;
+        grid-template-columns: 1fr !important; /* Upgrades ocupam a linha toda */
+        gap: 14px;
     }
 
-    .card{
-        width:72px;
-        height:100px;
-
-        flex-shrink:0;
+/* ======================================
+       4. AJUSTE FINO DOS STATS (LADO A LADO)
+    ====================================== */
+    .stats-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important; /* Força 2 colunas */
+        gap: 12px !important;
+        width: 100% !important;
+        padding: 0 10px !important;
     }
 
-    .card-image{
-        width:100%;
-        height:100%;
+    .stat-item {
+        margin: 0 !important; /* Remove margens que quebram o alinhamento */
+        width: 100% !important;
     }
 
-    /* ==================================================
-       UPGRADES / GRID
-    ================================================== */
-
-    .upgrade-grid-container,
+/* ======================================
+       5. SISTEMA DE CARTAS (Fix de Proporção)
+    ====================================== */
+    
     .cards-grid,
-    .cards-container,
-    .stats-grid{
-        display:grid;
-
-        grid-template-columns:1fr !important;
-
-        gap:14px;
+    .cards-container {
+        display: grid !important;
+        /* Define tamanho mínimo da coluna e distribui o resto */
+        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)) !important;
+        grid-auto-rows: max-content !important; /* Garante que a linha acompanhe a altura da carta */
+        gap: 20px 12px !important;
+        justify-items: center !important;
+        align-items: start !important;
+        padding: 10px 10px 120px !important; 
     }
 
-    /* ==================================================
-       LOGIN
-    ================================================== */
-
-    .login-box{
-        width:92%;
-        max-width:340px;
-
-        padding:24px;
+    /* Forçar o formato das cartas em todas as telas (Coleção e Batalha) */
+    .card {
+        width: 85px !important;
+        height: 120px !important;
+        min-height: 120px !important; /* Previne o achatamento severo */
+        max-height: 120px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        position: relative !important;
+        flex-shrink: 0 !important;
+        box-sizing: border-box !important;
+        border-radius: 8px !important;
+        /* Overflow visible permite que a bolinha de energia vaze um pouco pra fora sem cortar */
+        overflow: visible !important; 
+    }
+    
+    .card-image,
+    .card img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        border-radius: 8px !important;
+        z-index: 1 !important;
     }
 
-    /* ==================================================
-       MODAIS
-    ================================================== */
-
-    .modal-overlay{
-        padding:15px;
-
-        overflow-y:auto;
+    /* Garantir que o Custo de Energia fique acima da imagem */
+    .card-cost {
+        position: absolute !important;
+        top: -6px !important;
+        left: -6px !important;
+        z-index: 10 !important;
     }
 
-    .modal-content{
-        width:100%;
-        max-width:500px;
-
-        margin:auto;
-
-        max-height:90dvh;
-
-        overflow-y:auto;
-
-        padding:20px;
-
-        box-sizing:border-box;
+    /* ======================================
+       6. TELA DE BATALHA E ENTIDADES
+    ====================================== */
+    .battle-screen {
+        position: relative;
+        width: 100%;
+        height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 10px 8px 260px; /* Espaço inferior para cartas e HUD */
+        overflow-y: auto;
+        overflow-x: hidden;
     }
-
-}
-@media (max-width:768px){
-
-    .main-sidebar{
-        position:fixed !important;
-
-        bottom:0 !important;
-        top:auto !important;
-
-        left:0 !important;
-        right:0 !important;
-
-        width:100vw !important;
-        height:78px !important;
-
-        margin:0 !important;
-        padding:0 !important;
-
-        z-index:999999 !important;
-
-        display:flex !important;
-        flex-direction:row !important;
-
-        align-items:center !important;
-        justify-content:center !important;
-
-        transform:none !important;
-    }
-
-}
-/* =========================================
-   MOBILE BATALHA FINAL
-========================================= */
-
-@media (max-width:768px){
-
-    .battle-screen{
-
-        position:relative;
-
-        width:100%;
-        height:100dvh;
-
-        display:flex;
-        flex-direction:column;
-
-        align-items:center;
-        justify-content:flex-start;
-
-        padding:
-            10px
-            8px
-            210px;
-
-        box-sizing:border-box;
-
-        overflow-y:auto;
-        overflow-x:hidden;
-    }
-
-    /* TEXTO SUPERIOR */
 
     .battle-info,
-    .battle-log{
-
-        width:100%;
-
-        text-align:center;
-
-        font-size:0.75rem;
-
-        line-height:1.2;
-
-        margin-bottom:5px;
+    .battle-log {
+        width: 100%;
+        text-align: center;
+        font-size: 0.75rem;
+        line-height: 1.2;
+        margin-bottom: 5px;
     }
 
-    /* PERSONAGENS */
-
-    .battle-entities{
-
-        width:100%;
-
-        display:flex !important;
-
-        flex-direction:row !important;
-
-        justify-content:space-evenly;
-
-        align-items:flex-start;
-
-        gap:8px;
-
-        margin-top:5px;
+    .battle-entities {
+        width: 100%;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-evenly;
+        align-items: flex-start;
+        gap: 8px;
+        margin-top: 5px;
     }
 
-    .entity{
-
-        width:48%;
-
-        display:flex;
-        flex-direction:column;
-
-        align-items:center;
-
-        gap:5px;
+    .entity {
+        width: 48%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
     }
-
-    /* SPRITES */
 
     .entity img,
-    .sprite-container{
-
-        width:72px !important;
-        height:72px !important;
-
-        object-fit:contain;
+    .sprite-container {
+        width: 72px !important;
+        height: 72px !important;
+        object-fit: contain;
     }
 
-    /* NOMES */
-
-    .entity-name{
-
-        font-size:0.72rem;
-
-        text-align:center;
-
-        line-height:1;
+    .entity-name {
+        font-size: 0.72rem;
+        text-align: center;
+        line-height: 1;
     }
 
-    /* VIDA */
-
-    .hp-bar{
-
-        width:90px !important;
-        height:10px !important;
+    .hp-bar {
+        width: 90px !important;
+        height: 10px !important;
     }
 
-    .hp-text-overlay{
-
-        font-size:0.55rem;
+    .hp-text-overlay {
+        font-size: 0.55rem;
     }
 
     /* ======================================
-       HUD FIXA
+       7. SELEÇÃO DE ALVO E BOTÃO INICIAR BATALHA
     ====================================== */
-
-    .game-controls{
-
-        position:fixed;
-
-        bottom:118px;
-        left:50%;
-
-        transform:translateX(-50%);
-
-        width:95%;
-
-        display:flex;
-
-        justify-content:center;
-        align-items:center;
-
-        flex-wrap:wrap;
-
-        gap:8px;
-
-        padding:10px;
-
-        border-radius:16px;
-
-        background:
-            rgba(5,8,18,0.92);
-
-        backdrop-filter:blur(10px);
-
-        z-index:9998;
+    #targetSelectionOverlay, 
+    .target-modal {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(0,0,0,0.85) !important;
+        z-index: 100000 !important; 
+        display: flex !important;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
 
-    /* BOTÕES */
-
-    .btn-turn,
-    #btnStartBattle{
-
-        min-height:42px;
-
-        padding:10px 14px;
-
-        font-size:0.75rem;
-
-        border-radius:14px;
+    #btnStartBattle {
+        position: fixed;
+        bottom: 118px; 
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        z-index: 9998;
+        min-height: 42px;
+        padding: 10px 16px;
+        font-size: 0.75rem;
+        border-radius: 14px;
     }
 
     /* ======================================
-       CARTAS FIXAS
+       8. HUD DOS CONTROLES DE BATALHA
     ====================================== */
-
-    .hand{
-
-        position:fixed;
-
-        bottom:72px;
-        left:0;
-
-        width:100%;
-
-        display:flex;
-
-        align-items:center;
-
-        gap:8px;
-
-        overflow-x:auto;
-        overflow-y:hidden;
-
-        padding:
-            10px
-            8px
-            12px;
-
-        background:
-            linear-gradient(
-                to top,
-                rgba(5,8,18,0.98),
-                rgba(5,8,18,0.85)
-            );
-
-        backdrop-filter:blur(10px);
-
-        box-sizing:border-box;
-
-        z-index:9999;
-
-        -webkit-overflow-scrolling:touch;
+    .game-controls {
+        position: fixed;
+        bottom: 165px; 
+        left: 50%;
+        transform: translateX(-50%);
+        width: 95%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px;
+        border-radius: 16px;
+        background: rgba(5,8,18,0.94);
+        backdrop-filter: blur(10px);
+        z-index: 9998;
     }
 
-    /* SCROLL HORIZONTAL */
-
-    .hand::-webkit-scrollbar{
-        display:none;
-    }
-
-    .hand{
-        scroll-snap-type:x mandatory;
-    }
-
-    .card{
-
-        width:68px !important;
-        height:96px !important;
-
-        flex-shrink:0;
-
-        scroll-snap-align:center;
-    }
-
-    .card-image{
-
-        width:100%;
-        height:100%;
-
-        object-fit:cover;
+    .btn-turn {
+        min-height: 42px;
+        padding: 10px 16px;
+        font-size: 0.75rem;
+        border-radius: 14px;
+        flex: 1;
+        min-width: 140px;
     }
 
     /* ======================================
-       SIDEBAR
+       9. MÃO DE CARTAS FIXA NA BATALHA
     ====================================== */
-
-    .main-sidebar{
-
-        position:fixed !important;
-
-        bottom:0;
-        left:0;
-
-        width:100%;
-        height:72px;
-
-        z-index:10000;
-
-        background:
-            rgba(5,8,18,0.98);
-
-        backdrop-filter:blur(10px);
-
-        border-top:
-            1px solid rgba(255,255,255,0.08);
+    .hand {
+        position: fixed;
+        bottom: 72px;
+        left: 0;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        overflow-x: auto;
+        overflow-y: visible; /* Alterado para visível */
+        padding: 10px 8px 12px;
+        background: linear-gradient(to top, rgba(5,8,18,0.98), rgba(5,8,18,0.82));
+        backdrop-filter: blur(10px);
+        z-index: 9999;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
     }
 
-    .sidebar-menu{
-
-        width:100%;
-        height:100%;
-
-        display:flex;
-
-        justify-content:space-around;
-        align-items:center;
+    .hand::-webkit-scrollbar {
+        display: none;
     }
 
-    .sidebar-btn{
-
-        flex:1;
-
-        display:flex;
-        flex-direction:column;
-
-        justify-content:center;
-        align-items:center;
-
-        gap:4px;
-
-        font-size:0.62rem;
-
-        color:white;
+    /* Ajuste específico para a carta dentro da mão */
+    .hand .card {
+        width: 70px !important; /* Aumentado levemente para melhor visualização */
+        height: 100px !important;
+        flex-shrink: 0;
+        scroll-snap-align: center;
+        overflow: visible !important; /* IMPORTANTE: Permite que elementos como o custo não sejam cortados */
+        position: relative !important;
+        background: none !important; /* Garante que o fundo não interfira */
     }
 
+    .hand .card img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        border-radius: 8px !important;
+    }
+
+    /* ======================================
+       10. SIDEBAR DE NAVEGAÇÃO INFERIOR
+    ====================================== */
+    .main-sidebar {
+        position: fixed !important;
+        bottom: 0 !important;
+        top: auto !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100vw !important;
+        height: 78px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        z-index: 999999 !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: #0b1220 !important;
+        border-top: 1px solid rgba(255,255,255,0.08);
+        backdrop-filter: blur(12px);
+        transform: none !important;
+    }
+
+    .sidebar-menu {
+        width: 100%;
+        height: 100%;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-around;
+        align-items: center;
+        gap: 0;
+    }
+
+    .sidebar-btn {
+        flex: 1;
+        height: 100%;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+        border: none;
+        background: none;
+        color: white;
+        font-size: 0.62rem;
+        padding: 4px;
+    }
+
+    .sidebar-logo {
+        display: none !important;
+    }
+    /* Classe auxiliar para esconder os botões de batalha durante modais */
+.hide-during-modal {
+    display: none !important;
 }
-/* ======================================
-   HUD + CARTAS FIXAS
-====================================== */
-
-@media (max-width:768px){
-
-    /* ÁREA DOS BOTÕES */
-
-    .game-controls{
-
-        position:fixed;
-
-        bottom:165px; /* acima das cartas */
-        left:50%;
-
-        transform:translateX(-50%);
-
-        width:95%;
-
-        display:flex;
-
-        justify-content:center;
-        align-items:center;
-
-        flex-wrap:wrap;
-
-        gap:8px;
-
-        padding:10px;
-
-        border-radius:16px;
-
-        background:
-            rgba(5,8,18,0.94);
-
-        backdrop-filter:blur(10px);
-
-        z-index:9998;
-
-        box-sizing:border-box;
-    }
-
-    /* BOTÕES */
-
-    .btn-turn,
-    #btnStartBattle{
-
-        min-height:42px;
-
-        padding:10px 16px;
-
-        font-size:0.75rem;
-
-        border-radius:14px;
-
-        flex:1;
-
-        min-width:140px;
-    }
-
-    /* ======================================
-       CARTAS FIXAS
-    ====================================== */
-
-    .hand{
-
-        position:fixed;
-
-        bottom:72px;
-        left:0;
-
-        width:100%;
-
-        display:flex;
-
-        align-items:center;
-
-        gap:8px;
-
-        overflow-x:auto;
-        overflow-y:hidden;
-
-        padding:
-            10px
-            8px
-            12px;
-
-        background:
-            linear-gradient(
-                to top,
-                rgba(5,8,18,0.98),
-                rgba(5,8,18,0.82)
-            );
-
-        backdrop-filter:blur(10px);
-
-        box-sizing:border-box;
-
-        z-index:9999;
-
-        -webkit-overflow-scrolling:touch;
-
-        scroll-snap-type:x mandatory;
-    }
-
-    .hand::-webkit-scrollbar{
-        display:none;
-    }
-
-    .card{
-
-        width:68px !important;
-        height:96px !important;
-
-        flex-shrink:0;
-
-        scroll-snap-align:center;
-    }
-
-    /* ESPAÇO PARA HUD FIXA */
-
-    .battle-screen{
-
-        padding-bottom:260px !important;
-    }
-
 }
