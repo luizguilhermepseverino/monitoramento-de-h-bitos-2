@@ -3,8 +3,10 @@
 // ==========================================
 let currentStage = 0;
 let gold = 0; 
+let shopFromProgression = false; // 🔥 Nova linha: rastreia se a loja abriu sozinha na progressão
 let shopUnlocked = false;
-
+let shopAlreadyOpened = false;
+let justClosedShop = false;
 const enemiesList = [
     { name: "Globin", hp: 45, maxHp: 45, color: "#27ae60", img: "globin.png" },
     { name: "Golem", hp: 90, maxHp: 90, color: "#e67e22", img: "golem.png" },
@@ -255,6 +257,31 @@ let availableRewards = [
     img: "eclipse.png",
     colorClass: "card-magia"
 },
+{ 
+    name: "Estocada Rápida", 
+    type: "pierce_attack", // Tipo customizado para garantir o efeito
+    cost: 0, 
+    power: 12, 
+    img: "estocada.png", 
+    colorClass: "card-espada" 
+},
+{ 
+    name: "Frenesi de Lâminas", 
+    type: "multi_hit", 
+    hits: 4, 
+    cost: 3, 
+    power: 15, 
+    img: "frenesi.png", 
+    colorClass: "card-ataque" 
+},
+{ 
+    name: "Adaga Envenenada", 
+    type: "poison_dagger", 
+    cost: 1, 
+    power: 10, 
+    img: "adaga_veneno.png", 
+    colorClass: "card-espada" 
+}
 ];
 const masterDeck = [
     { name: "Golpe", type: "atk", cost: 1, power: 15, img: "golpe.png", colorClass: "card-ataque" },
@@ -263,12 +290,12 @@ const masterDeck = [
     { name: "Golpe", type: "atk", cost: 1, power: 15, img: "golpe.png", colorClass: "card-ataque" },
     { name: "Golpe", type: "atk", cost: 1, power: 15, img: "golpe.png", colorClass: "card-ataque" },
     { name: "Golpe", type: "atk", cost: 1, power: 15, img: "golpe.png", colorClass: "card-ataque" },
-    { name: "Escudo", type: "def", cost: 1, power: 20, img: "escudo.png", colorClass: "card-defesa" },
-    { name: "Escudo", type: "def", cost: 1, power: 20, img: "escudo.png", colorClass: "card-defesa" },
-    { name: "Escudo", type: "def", cost: 1, power: 20, img: "escudo.png", colorClass: "card-defesa" },
-    { name: "Escudo", type: "def", cost: 1, power: 20, img: "escudo.png", colorClass: "card-defesa" },
-    { name: "Escudo", type: "def", cost: 1, power: 20, img: "escudo.png", colorClass: "card-defesa" },
-    { name: "Escudo", type: "def", cost: 1, power: 20, img: "escudo.png", colorClass: "card-defesa" }
+    { name: "Escudo", type: "def", cost: 1, power: 15, img: "escudo.png", colorClass: "card-defesa" },
+    { name: "Escudo", type: "def", cost: 1, power: 15, img: "escudo.png", colorClass: "card-defesa" },
+    { name: "Escudo", type: "def", cost: 1, power: 15, img: "escudo.png", colorClass: "card-defesa" },
+    { name: "Escudo", type: "def", cost: 1, power: 15, img: "escudo.png", colorClass: "card-defesa" },
+    { name: "Escudo", type: "def", cost: 1, power: 15, img: "escudo.png", colorClass: "card-defesa" },
+    { name: "Escudo", type: "def", cost: 1, power: 15, img: "escudo.png", colorClass: "card-defesa" }
 ];
 
 const DOM = {
@@ -432,19 +459,76 @@ function startBattle() {
 // ==========================================
 // --- LÓGICA DE PRÉ-BATALHA E UPGRADE ---
 // ==========================================
+
 function tryStartBattle() {
-    // Estágio 2 = Cavaleiro Sombrio | Estágio 3 = Cientista
-    if (currentStage === 2 || currentStage === 4) {
+
+    // =====================================
+    // TELA DE UPGRADE
+    // =====================================
+    if (currentStage === 2 || currentStage === 5) {
+
         openUpgradeScreen();
-    } else {
-        shopUnlocked = false; // Garante que a loja tranque em batalhas comuns
+        return;
+    }
+
+    // =====================================
+    // LOJA AUTOMÁTICA
+    // =====================================
+    else if (currentStage === 3 || currentStage === 6) {
+
+        shopUnlocked = true;
+
+        // avisa que veio da progressão
+        shopFromProgression = true;
+
+        // pausa qualquer estado de batalha
+        battleStarted = false;
+        isPlayerTurn = false;
+        isProcessingTurn = false;
+
+        // abre a loja correta
+        toggleShop(true);
+
+        return;
+    }
+
+    // =====================================
+    // BATALHA NORMAL
+    // =====================================
+    else {
+
+        shopUnlocked = false;
+
         startBattle();
+    }
+}
+// --- FUNÇÃO PARA ABRIR A LOJA AUTOMATICAMENTE ---
+function openShop() {
+    // 1. Remove a classe ativa de todas as telas principais para escondê-las
+    const screens = document.querySelectorAll(".screen");
+    screens.forEach(screen => screen.classList.remove("active-screen"));
+
+    // 2. Localiza a tela da loja e a exibe adicionando a classe ativa
+    const shopScreen = document.getElementById("screen-shop");
+    if (shopScreen) {
+        shopScreen.classList.add("active-screen");
+        log("🏪 Uma loja apareceu na sua jornada! Prepare suas moedas.");
+    } else {
+        console.error("Erro: O elemento HTML 'screen-shop' não foi encontrado.");
     }
 }
 
 function openUpgradeScreen() {
     const screen = document.getElementById('upgradeScreen');
     const container = document.getElementById('upgradeCardDisplay');
+    
+    // --- ADICIONADO: Esconder os botões da tela de batalha ---
+    const gameControls = document.querySelector('.game-controls');
+    const btnStartBattle = document.getElementById('btnStartBattle');
+    
+    if (gameControls) gameControls.classList.add('hide-during-modal');
+    if (btnStartBattle) btnStartBattle.classList.add('hide-during-modal');
+    // ---------------------------------------------------------
     
     screen.classList.remove('hidden');
     container.innerHTML = '';
@@ -501,6 +585,14 @@ function selectUpgrade(index) {
     
     // Fecha a tela de upgrade
     document.getElementById('upgradeScreen').classList.add('hidden');
+    
+    // 👇 ADICIONADO: Restaura os botões de controle e de iniciar batalha 👇
+    const gameControls = document.querySelector('.game-controls');
+    const btnStartBattle = document.getElementById('btnStartBattle');
+    
+    if (gameControls) gameControls.classList.remove('hide-during-modal');
+    if (btnStartBattle) btnStartBattle.classList.remove('hide-during-modal');
+    // ---------------------------------------------------------------------
     
     // Tranca a loja e inicia a batalha contra o Boss
     shopUnlocked = false; 
@@ -876,6 +968,18 @@ let refletido = dano;
                 log(`Curou ${card.power} HP`);
                 break;
 
+                case "sang":
+            // Aplica o dano básico da Lâmina Sombria
+            enemyHp += card.power;
+            log(`⚔️ Você usa ${card.name} e causa ${card.power} de dano!`);
+
+            // Aplica o efeito de sangramento (bleed) igual você já tinha programado
+            if (card.effect === "bleed") {
+                enemyBleedTurns = 3;
+                log("🩸 O inimigo está sangrando! (Perderá 10 de vida por rodada durante 3 turnos)");
+            }
+            break;
+
             case "energy": 
                 player.energy += card.power; 
                 log(`Foco! +${card.power}⚡.`);
@@ -885,9 +989,12 @@ let refletido = dano;
                 }
                 break;
 
-            case "recycle":
-                currentHand = []; drawHand();
-                log("Mão reciclada!");
+case "recycle":
+                currentHand = []; 
+                // Se estiver upada, compra 6 cartas (5 padrão + 1 extra), senão compra 5
+                let cartasParaComprar = card.extraCards ? 6 : 5;
+                drawHand(cartasParaComprar);
+                log(card.extraCards ? "Mão reciclada com +1 carta extra!" : "Mão reciclada!");
                 break;
 
             case "time_stop":
@@ -897,6 +1004,43 @@ let refletido = dano;
                 player.energy += 1;
                 log("O tempo parou!");
                 break;
+                case "pierce_attack":
+    // Calcula o dano considerando os buffs temporários do jogador
+    let danoEstocada = card.power + player.dmgBuff;
+    
+    // Aplica o dano usando o sistema nativo do seu jogo
+    aplicarDanoComFiltro(targetEnt, targetType, danoEstocada, card.name);
+    
+    log(`⚔️ Estocada Rápida! Um ataque relâmpago sem custo causou ${danoEstocada} de dano!`);
+    player.dmgBuff = 0; // Consome o buff de dano após atacar
+    break;
+    case "multi_hit":
+    let golpes = card.hits || 4;
+    let danoPorCadaGolpe = card.power + player.dmgBuff;
+    let danoTotalAcumulado = danoPorCadaGolpe * golpes;
+
+    log(`🌪️ Frenesi de Lâminas! Iniciando uma sequência implacável de ${golpes} golpes!`);
+    
+    // Executa o laço de repetição para golpear múltiplas vezes
+    for (let i = 0; i < golpes; i++) {
+        aplicarDanoComFiltro(targetEnt, targetType, danoPorCadaGolpe, `${card.name} (Golpe ${i+1}/${golpes})`);
+    }
+
+    log(`💥 Combo Finalizado! Causal total de ${danoTotalAcumulado} de dano.`);
+    player.dmgBuff = 0; // Consome o buff de dano
+    break;
+    case "poison_dagger":
+    let danoInicial = card.power + player.dmgBuff;
+    
+    // Causa o dano físico da lâmina
+    aplicarDanoComFiltro(targetEnt, targetType, danoInicial, card.name);
+    
+    // Aplica ou acumula os turnos de sangramento no inimigo usando o sistema do seu jogo
+    targetEnt.bleedTurns = (targetEnt.bleedTurns || 0) + 3;
+    
+    log(`☣️ Adaga Envenenada! Causou ${danoInicial} de dano cortante e infectou o alvo com Sangramento por 3 turnos!`);
+    player.dmgBuff = 0; // Consome o buff de dano
+    break;
 
             case "execute":
                 if (enemy.name.includes("Feiticeira") && targetType !== (enemy.realIdentity || "enemy")) {
@@ -994,14 +1138,22 @@ let refletido = dano;
                 player.dmgBuff = 0;
                 break;
 
-            case "vampiric_atk":
+case "vampiric_atk":
                 if (enemy.name.includes("Feiticeira") && targetType !== (enemy.realIdentity || "enemy")) {
                     log(`💨 Golpe Vampírico errou a feiticeira real! Você não sugou vida.`);
                     aplicarDanoComFiltro(targetEnt, targetType, finalPower, "Golpe Vampírico");
                 } else {
-                    let hpVampDmg = Math.max(0, finalPower - (targetEnt.enemyShield || 0));
                     aplicarDanoComFiltro(targetEnt, targetType, finalPower, "Golpe Vampírico");
-                    let healAmt = Math.floor(hpVampDmg * 0.5);
+                    
+                    let healAmt;
+                    // Se tiver o upgrade aplicado, cura fixo 20, senão calcula os 50% tradicionais
+                    if (card.fixedHeal) {
+                        healAmt = card.fixedHeal;
+                    } else {
+                        let hpVampDmg = Math.max(0, finalPower - (targetEnt.enemyShield || 0));
+                        healAmt = Math.floor(hpVampDmg * 0.5);
+                    }
+                    
                     player.hp = Math.min(100, player.hp + healAmt);
                     if(healAmt > 0) log(`🍷 Sugou ${healAmt} de HP.`);
                 }
@@ -1009,24 +1161,33 @@ let refletido = dano;
                 break;
 
 case "loop":
-    if (lastPlayedCard && lastPlayedCard.type !== "loop") {
-        let copiedCard = {
-            ...lastPlayedCard,
-            id: Math.random().toString(36).substr(2, 9)
-        };
+                if (lastPlayedCard && lastPlayedCard.type !== "loop") {
+                    let copiedCard = { ...lastPlayedCard, id: Math.random().toString(36).substr(2, 9) };
+                    
+                    // Se a carta Loop tiver o upgrade aplicado, diminui o custo da cópia em 1
+                    if (card.reduceCost) {
+                        copiedCard.cost = Math.max(0, copiedCard.cost - card.reduceCost);
+                        log(`Loop Perfeito! Retornou ${copiedCard.name} custando ${copiedCard.cost}⚡!`);
+                    } else {
+                        log(`Loop! Retornou ${copiedCard.name} para sua mão.`);
+                    }
+                    
+                    currentHand.push(copiedCard);
+                } else {
+                    log("Loop falhou.");
+                }
+                break;
 
-        currentHand.push(copiedCard);
-
-        log(`Loop! Retornou ${copiedCard.name} para sua mão.`);
-    } else {
-        log("Loop falhou.");
-    }
-    break;
-
-            case "sobrecarga":
+case "sobrecarga":
                 player.energy += 3;
-                overloadedNextTurn = true;
-                log("Sobrecarga! +3⚡ agora. Mas você terá limite de energia no próximo turno.");
+                // Se tiver o upgrade, evita ativar o bloqueio do próximo turno
+                if (card.noOverloadPenalty) {
+                    overloadedNextTurn = false;
+                    log("Sobrecarga Estabilizada! +3⚡ agora e sem penalidades no próximo turno!");
+                } else {
+                    overloadedNextTurn = true;
+                    log("Sobrecarga! +3⚡ agora. Mas você terá limite de energia no próximo turno.");
+                }
                 break;
 
             case "ataque_calculado":
@@ -1338,8 +1499,15 @@ function getCardDescription(card) {
         case "descarte_atk":
             return `Causa ${card.power} de dano e destrói uma carta aleatória da sua mão.`;
 
-        case "vampiric_atk":
+case "vampiric_atk":
+            // Se a carta já tiver a propriedade fixedHeal (ou seja, foi upada), mostra o texto novo
+            if (card.fixedHeal) {
+                return `Causa ${card.power} de dano e cura exatamente 20 HP.`;
+            }
+            // Caso contrário, mostra o texto da carta normal
             return `Causa ${card.power} de dano e recupera 50% do dano causado.`;
+            case "sang":
+            return `Causa ${card.power} de dano e aplica 3 turnos de Sangramento.`;
 
         // =========================
         // NOVAS CARTAS
@@ -1362,6 +1530,17 @@ function getCardDescription(card) {
 
         case "eclipse":
             return `Causa ${card.power} de dano massivo, mas você perde ${card.selfDamage} HP.`;
+// --- INJETAR DENTRO DO SWITCH NA FUNÇÃO getCardDescription(card) ---
+
+case "pierce_attack":
+    return `⚔️ Um ataque relâmpago que causa ${card.power} de dano. Excelente para esticar combos por custar 0⚡!`;
+
+case "multi_hit":
+    let qteGolpes = card.hits || 4;
+    return `🌪️ Desfere uma sequência implacável de ${qteGolpes} golpes, causando ${card.power} de dano em cada um. (Seus buffs de dano se aplicam a cada golpe!)`;
+
+case "poison_dagger":
+    return `🧪 Fere o inimigo causando ${card.power} de dano físico e o infecta com 3 turnos de Sangramento (Bleed).`;
 
         default:
             return `Um efeito misterioso...`;
@@ -1695,57 +1874,50 @@ function processSingleMinionAction(m) {
 }
 
 function checkGameOver() {
-    // 1. Verifica se o Chefe morreu
+
+    // =========================
+    // MORTE DO LACAIO
+    // =========================
+    if (minion && minion.hp <= 0) {
+        log(`${minion.name} foi derrotado!`);
+        minion = null;
+        currentTarget = "enemy";
+        updateUI();
+    }
+
+    // =========================
+    // VITÓRIA CONTRA O BOSS
+    // =========================
+    // A batalha termina APENAS quando o boss morrer.
+    // Não importa se ainda existe clone/lacaio.
     if (enemy.hp <= 0) {
-        
-        // --- CHECAGEM DE BANDO ---
-        if (enemy.name === "Líder dos Ladrões") {
-            let lacaio1Vivo = minion && minion.hp > 0;
-            let lacaio2Vivo = minion2 && minion2.hp > 0;
 
-            // Se ainda tiver lacaio vivo, a batalha continua
-            if (lacaio1Vivo || lacaio2Vivo) {
-                if (currentTarget === 'enemy') {
-                    if (lacaio1Vivo) currentTarget = 'minion';
-                    else if (lacaio2Vivo) currentTarget = 'minion2';
-                }
-                updateUI();
-                return false; 
-            }
-        }
-
-        // --- FIM DA BATALHA ---
         inBattle = false;
-        const reward = Math.floor(Math.random() * 11) + 15; 
+
+        const reward = Math.floor(Math.random() * 11) + 15;
         gold += reward;
 
-        // Desbloqueia a loja (agora de forma simples e organizada)
-        shopUnlocked = true;
-        log("🏪 A Loja foi desbloqueada!");
         log(`Vitória! Você coletou 💰 ${reward} moedas.`);
-        
-        // Limpeza geral
+
+        // limpa tudo da batalha
         minion = null;
-        minion2 = null; 
         currentTarget = "enemy";
         currentHand = [];
         overloadedNextTurn = false;
         lastPlayedCard = null;
-        
+
         updateUI();
         showRewardChoice();
-        return true; 
-        
-    } 
-    
-    // 2. Verifica se o jogador morreu
-    else if (player.hp <= 0) {
-        alert("GAME OVER!"); 
-        location.reload();
-        return true;
+        return;
     }
-    
-    return false;
+
+    // =========================
+    // GAME OVER PLAYER
+    // =========================
+    if (player.hp <= 0) {
+        alert("GAME OVER!");
+        location.reload();
+    }
 }
 function processSingleMinionAction(m) {
     if (!m || !m.nextAction) return;
@@ -2715,10 +2887,6 @@ function aplicarEfeitoDeUpgrade(card) {
             card.power += 1;
             break;
 
-        // =====================================
-        // NOVOS UPGRADES
-        // =====================================
-
         case "Lâmina Sombria":
             card.cost = 1;
             break;
@@ -2738,15 +2906,48 @@ function aplicarEfeitoDeUpgrade(card) {
         card.power = + 2;
         break;
 
+// --- NOVOS UPGRADES SOLICITADOS ---
+        case "Lâmina Sombria":
+            card.power += 10;                  // Aumenta o dano +10
+            card.cost = Math.max(0, card.cost - 1); // Diminui o custo em 1 (Mínimo 0)
+            break;
+
+        case "Reciclar Mão":
+            // Guarda o efeito modificado diretamente na carta para a lógica ler depois
+            card.extraCards = 1; 
+            break;
+
+        case "Boss Killer":
+            card.power += 10;                  // Aumenta +10 de dano
+            break;
+
+        case "Loop":
+            // Armazena uma propriedade dizendo que cartas retornadas ganham desconto
+            card.reduceCost = 1; 
+            break;
+
+        case "Sobrecarga":
+            // Indica que no próximo turno ela manterá a energia padrão
+            card.noOverloadPenalty = true; 
+            break;
+
+        case "Ataque Final":
+            card.power += 5;                   // Aumenta +5 de dano
+            break;
+
+        case "Golpe Vampírico":
+            // Define o modificador de cura fixa para 20
+            card.fixedHeal = 20; 
+            break;
+
+        // Se uma carta não possuir regra customizada, aplica um upgrade padrão genérico
         default:
-
-            if (card.power > 0) {
-                card.power += 10;
-            }
-
+            if (card.power > 0) card.power += 5;
+            else card.cost = Math.max(0, card.cost - 1);
             break;
     }
 
+    card.isUpgraded = true; // Marca a carta como melhorada
     return true;
 }
 function obterTextoPreviaUpgrade(card) {
@@ -2785,7 +2986,7 @@ case "Ataque Calculado":
         </span>
     `;
 
-case "Reciclar":
+case "recycle":
     return `
         <span style='color:#2ecc71;'>
             🃏 Compra +1 carta adicional
@@ -2804,11 +3005,34 @@ return `
             💥 Dano: +2
         </span>
     `;
+       // --- NOVOS PREVIEWS SOLICITADOS ---
+        case "Lâmina Sombria":
+            return `<span>Dano: ${card.power} ➔ <b style="color:#2ecc71">${card.power + 10}</b></span><br>
+                    <span>Custo: ${card.cost}⚡ ➔ <b style="color:#2ecc71">${Math.max(0, card.cost - 1)}⚡</b></span>`;
+
+        case "Reciclar Mão":
+            return `<span>Efeito: Recicla a mão ➔ <b style="color:#2ecc71">Compra +1 carta extra!</b></span>`;
+
+        case "Boss Killer":
+            return `<span>Dano: ${card.power} ➔ <b style="color:#2ecc71">${card.power + 10}</b></span>`;
+
+        case "Loop":
+            return `<span>Efeito: Retorna carta ➔ <b style="color:#2ecc71">Reduz custo dela em 1⚡!</b></span>`;
+
+        case "Sobrecarga":
+            return `<span>Penalidade: Limite 2⚡ ➔ <b style="color:#2ecc71">Sem penalidade (3⚡)!</b></span>`;
+
+        case "Ataque Final":
+            return `<span>Dano: ${card.power} ➔ <b style="color:#2ecc71">${card.power + 5}</b></span>`;
+
+        case "Golpe Vampírico":
+            return `<span>Cura: 50% do dano ➔ <b style="color:#2ecc71">Cura fixa de 20 HP!</b></span>`;
+
         default:
-            // Um texto padrão para qualquer outra carta que você criar
-            let mudanca = "";
-            if (card.power > 0) mudanca += `<span style='color: #2ecc71;'>💥 Status: +10</span><br>`;
-            return mudanca || "<span style='color: #f1c40f;'>Melhoria de atributos gerais!</span>";
+            if (card.power > 0) {
+                return `<span>Dano: ${card.power} ➔ <b style="color:#2ecc71">${card.power + 5}</b></span>`;
+            }
+            return `<span>Custo: ${card.cost}⚡ ➔ <b style="color:#2ecc71">${Math.max(0, card.cost - 1)}⚡</b></span>`;
     }
 }
 let witchRealTarget = "enemy";
@@ -2947,6 +3171,20 @@ function closeEditHabitMenu() {
     document
         .getElementById("editHabitOverlay")
         .classList.add("hidden");
+}
+function fecharLoja() {
+
+    // fecha a loja
+    toggleShop();
+
+    // se veio da progressão
+    if (shopFromProgression) {
+
+        shopFromProgression = false;
+
+        // inicia a batalha
+        startBattle();
+    }
 }
 
 function loadHabitToEditor(habit) {
@@ -3134,3 +3372,88 @@ function resetHabitMenu() {
 window.openEditHabitMenu = openEditHabitMenu;
 window.saveHabit = saveHabit;
 window.deleteHabit = deleteHabit;
+// ==========================================
+// --- COMPRA DE PACOTE DE CARTAS NA LOJA ---
+// ==========================================
+
+function buyRandomCardPack() {
+    const PRICE = 30;
+
+    // 1. Verifica moedas usando a variável global correta
+    if (gold < PRICE) {
+        log("❌ Moedas insuficientes para o Pacote!");
+        return;
+    }
+
+    // 2. Verifica se ainda existem cartas disponíveis
+    if (availableRewards.length < 2) {
+        log("❌ Não há cartas suficientes na loja para comprar!");
+        return;
+    }
+
+    // 3. Paga o valor
+    gold -= PRICE;
+    updateUI();
+
+    // 4. Sorteia dois índices de cartas diferentes
+    let idx1 = Math.floor(Math.random() * availableRewards.length);
+    let idx2;
+    do { 
+        idx2 = Math.floor(Math.random() * availableRewards.length); 
+    } while (idx1 === idx2);
+
+    const card1 = availableRewards[idx1];
+    const card2 = availableRewards[idx2];
+
+    // 5. Mostra a tela visual (adaptada para a loja)
+    showShopCardChoice(card1, card2, idx1, idx2);
+}
+
+function showShopCardChoice(card1, card2, idx1, idx2) {
+    const screen = document.getElementById('rewardScreen');
+    const container = document.getElementById('rewardCardDisplay');
+
+    // Usa a mesma tela de loot
+    screen.classList.remove('hidden');
+
+    container.innerHTML = `
+        <h3 style="color: #f1c40f; margin-bottom: 20px;">Pacote de Cartas! Escolha UMA:</h3>
+        <div style="display: flex; gap: 30px; justify-content: center; align-items: center;">
+            <div onclick="claimShopReward(${idx1})" style="cursor:pointer; text-align:center;">
+                <div class="card ${card1.colorClass}">
+                    <div class="card-cost">${card1.cost}</div>
+                    <img src="${card1.img}">
+                    <div class="card-tooltip">
+                        <b>${card1.name}</b><br>
+                        ${getCardDescription(card1)}
+                    </div>
+                </div>
+                <p style="color:white; font-weight:bold; margin-top:10px;">${card1.name}</p>
+            </div>
+            <div onclick="claimShopReward(${idx2})" style="cursor:pointer; text-align:center;">
+                <div class="card ${card2.colorClass}">
+                    <div class="card-cost">${card2.cost}</div>
+                    <img src="${card2.img}">
+                    <div class="card-tooltip">
+                        <b>${card2.name}</b><br>
+                        ${getCardDescription(card2)}
+                    </div>
+                </div>
+                <p style="color:white; font-weight:bold; margin-top:10px;">${card2.name}</p>
+            </div>
+        </div>
+    `;
+}
+
+function claimShopReward(index) {
+    // Remove a carta da pool geral e adiciona ao deck principal do jogador
+    const selected = availableRewards.splice(index, 1)[0];
+    masterDeck.push(selected);
+    
+    log(`🛍️ Você comprou e aprendeu: ${selected.name}!`);
+    
+    // Esconde a tela de recompensa para voltar à Loja
+    document.getElementById('rewardScreen').classList.add('hidden');
+    
+    updateUI();
+}
