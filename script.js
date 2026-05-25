@@ -968,17 +968,24 @@ let refletido = dano;
                 log(`Curou ${card.power} HP`);
                 break;
 
-                case "sang":
-            // Aplica o dano básico da Lâmina Sombria
-            enemyHp += card.power;
-            log(`⚔️ Você usa ${card.name} e causa ${card.power} de dano!`);
+case "sang":
 
-            // Aplica o efeito de sangramento (bleed) igual você já tinha programado
-            if (card.effect === "bleed") {
-                enemyBleedTurns = 3;
-                log("🩸 O inimigo está sangrando! (Perderá 10 de vida por rodada durante 3 turnos)");
-            }
-            break;
+    // causa dano
+    aplicarDanoComFiltro(
+        targetEnt,
+        targetType,
+        finalPower,
+        card.name
+    );
+
+    // aplica sangramento
+    targetEnt.bleedTurns = 3;
+
+    log(`🩸 ${card.name} aplicou Sangramento por 3 turnos!`);
+
+    player.dmgBuff = 0;
+
+    break;
 
             case "energy": 
                 player.energy += card.power; 
