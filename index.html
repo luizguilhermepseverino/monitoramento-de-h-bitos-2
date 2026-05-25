@@ -147,6 +147,97 @@
 </head>
 <body>
 
+
+<div id="tutorialOverlay" class="modal-overlay hidden">
+    
+    <div class="modal-content" style="max-width:700px;">
+
+        <h2 class="section-title">
+            🎮 Tutorial do HabitQuest
+        </h2>
+
+        <div id="tutorialContent" style="
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+            line-height: 1.7;
+            color: #dfe6e9;
+        ">
+
+            <h3 style="color:#f1c40f;">1. Criando Hábitos</h3>
+            <p>
+                Clique em <b>➕ Novo Hábito</b> para criar suas tarefas.
+                Escolha nome, descrição, dificuldade e frequência.
+            </p>
+
+            <h3 style="color:#f1c40f;">2. Concluindo Hábitos</h3>
+            <p>
+                Ao concluir um hábito, você ganha energia ⚡.
+                Quanto maior a dificuldade, maior a recompensa.
+            </p>
+
+            <h3 style="color:#f1c40f;">3. Sistema de Energia</h3>
+            <p>
+                A energia acumulada é usada durante as batalhas.
+                Ela aparece no topo da interface.
+            </p>
+
+            <h3 style="color:#f1c40f;">4. Sistema de Batalha</h3>
+            <p>
+                Vá até a aba ⚔️ Batalha e clique em
+                <b>Iniciar Batalha</b>.
+            </p>
+
+            <p>
+                Use cartas para:
+            </p>
+
+            <ul>
+                <li>⚔️ Atacar</li>
+                <li>🛡️ Defender</li>
+                <li>✨ Usar Magias</li>
+            </ul>
+
+            <h3 style="color:#f1c40f;">5. Loja</h3>
+            <p>
+                Use moedas 💰 para comprar:
+            </p>
+
+            <ul>
+                <li>Poções</li>
+                <li>Energia</li>
+                <li>Novas cartas</li>
+            </ul>
+
+            <h3 style="color:#f1c40f;">6. Histórico</h3>
+            <p>
+                Acompanhe:
+            </p>
+
+            <ul>
+                <li>📈 progresso semanal</li>
+                <li>🔥 streaks</li>
+                <li>⚡ energia gerada</li>
+                <li>✅ hábitos concluídos</li>
+            </ul>
+
+            <h3 style="color:#f1c40f;">7. Objetivo</h3>
+            <p>
+                O HabitQuest transforma hábitos reais em progresso dentro do jogo,
+                incentivando produtividade e disciplina.
+            </p>
+
+        </div>
+
+        <button onclick="closeTutorial()" class="btn-main mt-20">
+            Fechar Tutorial
+        </button>
+
+    </div>
+
+</div>
+<!--acabou o tutorial-->
+
     <div id="shopModal" class="hidden">
         <h2 class="text-gold upper">🏪 Mercado do Viajante</h2>
         <p style="color: #bdc3c7;">Moedas: <span class="text-gold" style="font-weight: bold;">💰 <span id="goldValue">0</span></span></p>
@@ -283,6 +374,14 @@
             <button class="sidebar-btn" data-screen="config">
                 <span>⚙️</span>
                 Configurações
+            </button>
+            <!-- =========================================
+                BOTÃO DO TUTORIAL
+                Coloque na sidebar/menu
+            ========================================= -->
+            <button class="sidebar-btn" onclick="openTutorial()">
+                <span>📖</span>
+                Tutorial
             </button>
 
 </nav>

@@ -3464,3 +3464,21 @@ function claimShopReward(index) {
     
     updateUI();
 }
+/* =========================================
+FUNÇÕES DO TUTORIAL
+Coloque no script.js
+========================================= */
+
+function openTutorial(){
+    document
+        .getElementById("tutorialOverlay")
+        .classList
+        .remove("hidden");
+}
+
+function closeTutorial(){
+    document
+        .getElementById("tutorialOverlay")
+        .classList
+        .add("hidden");
+}
