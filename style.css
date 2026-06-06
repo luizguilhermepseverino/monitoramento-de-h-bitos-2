@@ -3568,7 +3568,37 @@ button[onclick*="openEditHabitMenu"]:active, #btn-beta-tester:active {
 
     margin-top:30px;
 }
+#tutorialOverlay{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
+#tutorialOverlay .modal-content{
+    width: 90%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+.tutorial-modal{
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 800px;
+    width: 90%;
+}
+#tutorialOverlay .modal-content{
+    width: 80%;
+    max-width: 900px;
+    max-height: 85vh;
+
+    position: fixed;
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    overflow-y: auto;
+}
 
 
 
