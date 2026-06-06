@@ -3504,6 +3504,7 @@ button[onclick*="openEditHabitMenu"] {
     cursor: pointer !important;
     margin: 0 0 5px 0 !important;
     transition: transform 0.1s, filter 0.2s !important;
+    overflow: hidden;
 }
 
 /* Efeito de clique e hover premium para ambos os botões */
@@ -3514,6 +3515,9 @@ button[onclick*="openEditHabitMenu"]:hover, #btn-beta-tester:hover {
 button[onclick*="openEditHabitMenu"]:active, #btn-beta-tester:active {
     transform: translateY(2px) !important;
     box-shadow: none !important;
+}
+#btn-beta-tester {
+    visibility: hidden !important;
 }
 .sidebar h1,
 .sidebar .logo,
