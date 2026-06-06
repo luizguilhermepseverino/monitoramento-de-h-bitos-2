@@ -150,7 +150,8 @@
 
 <div id="tutorialOverlay" class="modal-overlay hidden">
     
-    <div class="modal-content" style="max-width:700px;">
+    <div class="modal-content tutorial-modal">
+        
 
         <h2 class="section-title">
             🎮 Tutorial do HabitQuest
@@ -160,6 +161,8 @@
             max-height: 500px;
             overflow-y: auto;
             padding-right: 10px;
+            justify-content: center; align-items: center;
+            background-position:center;
             line-height: 1.7;
             color: #dfe6e9;
         ">
@@ -366,23 +369,21 @@
                 Cartas
             </button>
 
-            <button class="sidebar-btn" data-screen="shop">
+           <!---- <button class="sidebar-btn" data-screen="shop">
                 <span>🛒</span>
                 Loja
-            </button>
+            </button> -->
+            
+                        <!-- =========================================
+                BOTÃO DO TUTORIAL
+                Coloque na sidebar/menu
+            ========================================= -->
 
             <button class="sidebar-btn" data-screen="config">
                 <span>⚙️</span>
                 Configurações
             </button>
-            <!-- =========================================
-                BOTÃO DO TUTORIAL
-                Coloque na sidebar/menu
-            ========================================= -->
-            <button class="sidebar-btn" onclick="openTutorial()">
-                <span>📖</span>
-                Tutorial
-            </button>
+
 
 </nav>
 
@@ -636,15 +637,44 @@ style="background-color:#e74c3c !important; border-bottom:5px solid #b03a2e !imp
     </header>
 
     <div class="config-panel" style="background: rgba(15, 20, 32, 0.96); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.06);">
-        <div class="config-item" style="display: flex; justify-content: space-between; align-items: center;">
+
+        <!-- Tema -->
+        <div class="config-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <div class="config-info">
-                <h3 style="margin: 0 0 5px 0; font-size: 1.2rem; color: #5da9ff;">Modo de Visualização</h3>
-                <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">Alternar entre o tema Escuro e Claro.</p>
+                <h3 style="margin:0 0 5px 0; font-size:1.2rem; color:#5da9ff;">
+                    Modo de Visualização
+                </h3>
+                <p style="margin:0; color:#94a3b8; font-size:0.9rem;">
+                    Alternar entre o tema Escuro e Claro.
+                </p>
             </div>
-            <button id="themeToggleBtn" onclick="toggleLightMode()" class="btn-main" style="width: auto; padding: 10px 25px;">
+
+            <button id="themeToggleBtn"
+                    onclick="toggleLightMode()"
+                    class="btn-main"
+                    style="width:auto; padding:10px 25px;">
                 Ativar Modo Claro ☀️
             </button>
         </div>
+
+        <!-- Tutorial -->
+        <div class="config-item" style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="config-info">
+                <h3 style="margin:0 0 5px 0; font-size:1.2rem; color:#5da9ff;">
+                    Tutorial
+                </h3>
+                <p style="margin:0; color:#94a3b8; font-size:0.9rem;">
+                    Revisar o guia de utilização do HabitQuest.
+                </p>
+            </div>
+
+            <button onclick="openTutorial()"
+                    class="btn-main"
+                    style="width:auto; padding:10px 25px;">
+                📖 Abrir Tutorial
+            </button>
+        </div>
+
     </div>
 </section>
 
